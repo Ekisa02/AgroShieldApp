@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <!-- Solid Colors -->
+    <color name="light_green">#8BC34A</color>  <!-- Light Green (500) -->
+    <color name="dark_green">#2E7D32</color>   <!-- Dark Green (800) -->
+    <color name="modern_green">#34C759</color>
+    <!-- Softer Natural Gradient Colors -->
+    <color name="purple_soft">#7D3C98</color>          <!-- Muted purple -->
+    <color name="green_natural">#48C9B0</color>      <!-- Teal-green transition -->
+    <color name="green_dark_muted">#1A5276</color>    <!-- Dark blue-green -->
+
+    <!-- Optional softer accents -->
+    <color name="purple_blend">#9B59B6</color>        <!-- Transition color -->
+    <color name="green_earth">#27AE60</color>         <!-- Natural green -->
+
+    <!-- Light Purple -->
+    <color name="light_purple_1">#C7B8EA</color>
+    <color name="light_purple_2">#B784F4</color>
+
+    <!-- Pastel Purple -->
+    <color name="pastel_purple_1">#C5C3C8</color>
+    <color name="pastel_purple_2">#A17AFF</color>
+
+    <!-- Rich Purple -->
+    <color name="rich_purple_1">#6c5ce7</color>
+    <color name="rich_purple_2">#7A288A</color>
+
+    <!-- Deep Purple -->
+    <color name="deep_purple_1">#5C0011</color>
+    <color name="deep_purple_2">#3B003F</color>
+
+    <!-- Vibrant Purple -->
+    <color name="vibrant_purple_1">#8e24aa</color>
+    <color name="vibrant_purple_2">#7A0BC0</color>
+    <!-- Ultra Vibrant Purple-Green Spectrum -->
+    <color name="purple_dark">#5B2C6F</color>          <!-- Deep mysterious purple -->
+    <color name="purple_vibrant">#9B59B6</color>       <!-- Electric purple -->
+    <color name="green_deep">#1D8348</color>           <!-- Forest green -->
+    <color name="green_light">#58D68D</color>          <!-- Bright lime accent -->
+
+    <!-- Gradient Colors (Optional) -->
+    <color name="gradient_start">#4CAF50</color>  <!-- Vibrant Green -->
+    <color name="gradient_end">#1B5E20</color>    <!-- Deep Green -->
+    <color name="purple_primary">#7B1FA2</color>
+    <color name="purple_secondary">#9C27B0</color>
+    <color name="purple_primary_dark">#4A148C</color>
+
+    <color name="green_15pc">#264CAF50</color> <!-- 15% opacity green -->
+    <!-- Primary Colors -->
+    <color name="primary_green">#4CAF50</color>
+    <color name="light_green_50">#E8F5E9</color>
+    <color name="light_green_200">#C8E6C9</color>
+
+    <!-- Text Colors -->
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
+    <color name="white_20pc">#33FFFFFF</color>
+
+    <!-- Status Bar Gradient -->
+    <color name="status_bar_start">#1B5E20</color>
+    <color name="status_bar_end">#4CAF50</color>
+    <color name="yellow">#FFC107</color>
+    <!-- Primary Colors -->
+
+    <color name="premium_gold">#FFD700</color>
+    <color name="error">#F44336</color>
+
+    <!-- Surface Colors -->
+    <color name="surface_variant">#F5F5F5</color>
+    <color name="outline_variant">#E0E0E0</color>
+
+    <!-- Text Colors -->
+
+    <color name="primary_icon">#757575</color>
+
+    <!-- Accents -->
+    <color name="circle_accent_bg">#3DDC84</color>
+
+
+</resources>

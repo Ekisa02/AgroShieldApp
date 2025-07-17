@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@drawable/gradient_background"
+    android:fitsSystemWindows="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp">
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="30dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:alpha="0.15"
+            android:rotation="135"
+            android:src="@drawable/gradient_bg" />
+
+        <!-- App Logo -->
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="40dp"
+            android:src="@mipmap/logo"
+            android:elevation="8dp"
+            android:background="@drawable/circle_background" />
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/logo"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:text="Welcome Back"
+            android:textColor="@android:color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-condensed" />
+
+        <!-- Subtitle -->
+        <TextView
+            android:id="@+id/subtitleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/titleText"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:text="Login to continue"
+            android:textColor="#E1E1E1"
+            android:textSize="16sp"
+            android:letterSpacing="0.03" />
+
+        <!-- Email Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/emailLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/subtitleText"
+            android:layout_marginTop="24dp"
+            android:hint="Email"
+            app:boxBackgroundColor="#FFFFFF"
+            app:boxStrokeColor="@color/purple_primary"
+            app:boxStrokeWidth="1.5dp"
+            app:errorEnabled="true"
+            app:hintTextColor="@color/purple_primary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/emailInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:textColor="@android:color/black" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Password Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/passwordLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/emailLayout"
+            android:layout_marginTop="16dp"
+            android:hint="Password"
+            app:boxBackgroundColor="#FFFFFF"
+            app:boxStrokeColor="@color/purple_primary"
+            app:boxStrokeWidth="1.5dp"
+            app:endIconMode="password_toggle"
+            app:errorEnabled="true"
+            app:hintTextColor="@color/purple_primary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/passwordInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@android:color/black" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Forgot Password -->
+        <TextView
+            android:id="@+id/forgotPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/passwordLayout"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="8dp"
+            android:text="Forgot Password?"
+            android:textColor="@android:color/white"
+            android:textStyle="italic"
+            android:padding="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <!-- Login Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/loginButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_below="@id/forgotPassword"
+            android:layout_marginTop="24dp"
+            android:text="LOGIN"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:elevation="4dp"
+            app:backgroundTint="@color/purple_primary"
+            app:cornerRadius="12dp"
+            app:icon="@drawable/ic_login"
+            app:iconTint="@android:color/white"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp" />
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_centerInParent="true"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+
+        <!-- Divider -->
+        <TextView
+            android:id="@+id/orText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/loginButton"
+            android:layout_marginTop="24dp"
+            android:text="OR"
+            android:textColor="@android:color/white"
+            android:textAlignment="center"
+            android:textSize="14sp" />
+
+        <!-- Google Sign In -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/googleSignInButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_below="@id/orText"
+            android:layout_marginTop="24dp"
+            android:text="Continue with Google"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:elevation="2dp"
+            app:backgroundTint="@android:color/white"
+            app:cornerRadius="12dp"
+            app:icon="@drawable/ic_google"
+            app:iconTint="@null"
+            app:iconPadding="8dp"
+            app:strokeColor="#DDDDDD"
+            app:strokeWidth="1dp" />
+
+        <!-- Sign Up Text -->
+        <TextView
+            android:id="@+id/signUpText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/googleSignInButton"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="40dp"
+            android:textStyle="bold"
+            android:text="Don't have an account? Sign Up"
+            android:textColor="@android:color/white" />
+
+        <!-- Decorative Element -->
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:src="@drawable/bg_circle_accent"
+            android:alpha="0.15"
+            android:rotation="135" />
+    </RelativeLayout>
+</ScrollView>

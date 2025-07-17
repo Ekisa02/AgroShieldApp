@@ -1,0 +1,103 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true"
+    android:background="@drawable/gradient_background">
+
+    <RelativeLayout
+        android:id="@+id/splash_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp"
+        android:paddingTop="?attr/actionBarSize"
+        android:fitsSystemWindows="true">
+
+        <!-- Logo centered vertically -->
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="40dp"
+            android:src="@mipmap/logo"
+            android:background="@drawable/circle_background"
+            android:scaleType="centerCrop"
+            android:clipToOutline="true"
+            android:elevation="8dp"
+            android:visibility="invisible"/>
+
+        <!-- App Name -->
+        <TextView
+            android:id="@+id/app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/logo"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:text="AgroShield"
+            android:textColor="@android:color/white"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-light"
+            android:shadowColor="#80000000"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="4"
+            android:visibility="invisible"/>
+
+        <!-- Slogan -->
+        <TextView
+            android:id="@+id/slogan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/app_name"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="70dp"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-light"
+            android:shadowColor="#80FFFFFF"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"/>
+        <!-- Decorative Element -->
+        <!-- Progress Bar pinned to bottom -->
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="33dp"
+            android:layout_marginBottom="155dp"
+            android:alpha="0.15"
+            android:rotation="135"
+            android:src="@drawable/gradient_bg" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginBottom="24dp"
+            android:minHeight="12dp"
+            android:outlineAmbientShadowColor="@color/deep_purple_2"
+            android:outlineSpotShadowColor="@color/purple_dark"
+            android:maxHeight="12dp"
+            android:indeterminate="true"
+            android:indeterminateTint="@android:color/holo_green_light"
+            android:progressBackgroundTint="@color/light_green"
+            android:visibility="visible"/>
+
+        <!-- Spacer to prevent content from being hidden behind progress bar -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_above="@id/progress_bar"
+            android:layout_below="@id/slogan"/>
+    </RelativeLayout>
+</ScrollView>

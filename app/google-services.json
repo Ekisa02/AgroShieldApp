@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "311692021704",
+    "project_id": "mkulimalink-a5def",
+    "storage_bucket": "mkulimalink-a5def.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:311692021704:android:35922b79fd227e1ef2bafd",
+        "android_client_info": {
+          "package_name": "com.Joseph.agroshieldapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "311692021704-53jdmvb4jsrjmr7fl8dr7pgqqrnq7fdu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDL5TX2BBLHPdL_U-N9zKAr87oALFv5-cY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "311692021704-53jdmvb4jsrjmr7fl8dr7pgqqrnq7fdu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
