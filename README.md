@@ -36,14 +36,12 @@ AgroShield is an AI-powered mobile application designed to support smallholder f
 
 Below are screenshots demonstrating key features of AgroShield:
 
-|splash Screen| Home Screen | Disease Diagnosis | Treatment Advice |
-|-------------|------------------|-----------------|
-|| ![Splash Screen](demo/splashscreen.jpeg) | ![Diagnosis](demo/onboardscrean.jpeg) | ![Treatment](demo/marketplace.jpeg) |
+|splash Screen| Login/Sighnup | Home Screen | 
+|| ![Splash Screen](demo/splashscreen.jpeg) | ![Login/Signup](demo/login.jpeg) | ![Login/Signup](demo/signup.jpeg)| ![Home Screen](demo/onboardscrean.jpeg) |
 
-| Prevention Tips | Marketplace | Agrovet Locator |
+|Marketplace|
 |-----------------|------------|-----------------|
-| ![Prevention](demo_screenshots/prevention.png) | ![Marketplace](demo_screenshots/marketplace.png) | ![Locator](demo_screenshots/locator.png) |
-
+ | ![Marketplace](demo/marketplace.jpeg) |
 *Screenshots are for demonstration purposes. Actual app UI/UX may vary as development progresses.*
 
 ---
