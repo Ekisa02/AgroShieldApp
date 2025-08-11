@@ -40,7 +40,7 @@ Below are screenshots demonstrating key features of AgroShield:
 || ![Splash Screen](demo/splashscreen.jpeg) | ![Login/Signup](demo/login.jpeg) | ![Login/Signup](demo/signup.jpeg)| ![Home Screen](demo/onboardscrean.jpeg) |
 
 |Marketplace|
-|-----------------|------------|-----------------|
+
  | ![Marketplace](demo/marketplace.jpeg) |
 *Screenshots are for demonstration purposes. Actual app UI/UX may vary as development progresses.*
 
