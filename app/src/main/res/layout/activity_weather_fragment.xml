@@ -184,78 +184,41 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <!-- Sample Crop Card -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="160dp"
-                        android:layout_height="200dp"
-                        android:layout_margin="10dp"
-                        android:layout_marginEnd="1dp"
-                        app:cardCornerRadius="12dp">
+                    <RelativeLayout
+                        xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
 
-                        <LinearLayout
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/cropsRecyclerView"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:padding="12dp">
+                            android:layout_height="200dp"
+                            android:layout_marginTop="8dp"
+                            android:orientation="horizontal" />
 
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="100dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/ic_corn" />
+                        <ProgressBar
+                            android:id="@+id/loadingIndicator"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:visibility="gone"
+                            style="?android:attr/progressBarStyleLarge" />
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="Corn Field"
-                                android:textColor="@color/primary_text"
-                                android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/progressText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Processing..."
+                            android:textSize="16sp"
+                            android:visibility="gone"
+                            android:layout_centerHorizontal="true"
+                            android:layout_below="@id/loadingIndicator"
+                            android:layout_marginTop="12dp" />
 
-                            <ProgressBar
-                                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                                android:layout_width="match_parent"
-                                android:layout_height="8dp"
-                                android:layout_marginTop="4dp"
-                                android:progress="65" />
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Second Sample Crop Card -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="160dp"
-                        android:layout_height="200dp"
-                        android:layout_margin="10dp"
-                        app:cardCornerRadius="12dp">
+                    </RelativeLayout>
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:padding="12dp">
 
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="100dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/ic_wheat" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="Wheat Field"
-                                android:textColor="@color/primary_text"
-                                android:textSize="16sp" />
-
-                            <ProgressBar
-                                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                                android:layout_width="match_parent"
-                                android:layout_height="8dp"
-                                android:layout_marginTop="4dp"
-                                android:progress="42" />
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
             </HorizontalScrollView>
             <!-- Add this below your weather stats GridLayout but before the Analytics Section -->

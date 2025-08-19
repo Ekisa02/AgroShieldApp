@@ -22,6 +22,9 @@ public class MainActivity extends AppCompatActivity {
 
         viewPager.setAdapter(new MainPagerAdapter(this));
 
+        // Disable swipe gesture
+        viewPager.setUserInputEnabled(false);
+
         bottomNav.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
 
@@ -40,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        // Sync bottom nav with pager
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             public void onPageSelected(int position) {
                 bottomNav.getMenu().getItem(position).setChecked(true);

@@ -54,7 +54,14 @@ dependencies {
     implementation(libs.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation(libs.firebase.database)
-
+// Image loading
+    implementation("com.squareup.picasso:picasso:2.71828")
+// TFLite
+    implementation("org.tensorflow:tensorflow-lite:2.12.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.3")
+    implementation("org.tensorflow:tensorflow-lite-metadata:0.4.3")
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -63,7 +70,8 @@ dependencies {
     annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("org.tensorflow:tensorflow-lite:2.4.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.1")
+    implementation("org.jsoup:jsoup:1.14.3")
+    implementation("com.github.bumptech.glide:glide:4.12.0")
 
 }

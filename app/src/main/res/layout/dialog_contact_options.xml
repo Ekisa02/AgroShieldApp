@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/btnWhatsApp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Contact via WhatsApp"
+        android:textColor="#FFFFFF"
+        android:drawableLeft="@drawable/ic_whatsapp"
+        android:drawableTint="#FFFFFF"
+        android:backgroundTint="#25D366"
+        style="@style/Widget.MaterialComponents.Button"/>
+
+    <Button
+        android:id="@+id/btnCall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Call Directly"
+        android:textColor="#FFFFFF"
+        android:drawableLeft="@drawable/ic_call"
+        android:drawableTint="#FFFFFF"
+        android:backgroundTint="#2196F3"
+        style="@style/Widget.MaterialComponents.Button"/>
+</LinearLayout>
