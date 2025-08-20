@@ -54,6 +54,13 @@ dependencies {
     implementation(libs.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation(libs.firebase.database)
+    //for profiile image
+    // For ExifInterface compatibility
+    implementation("androidx.exifinterface:exifinterface:1.3.6")
+    implementation("com.theartofdev.edmodo:android-image-cropper:2.8.0")
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
+    // Use Android-Image-Cropper alternative (updated library)
+    implementation("com.github.CanHub:Android-Image-Cropper:4.5.0")
 // Image loading
     implementation("com.squareup.picasso:picasso:2.71828")
 // TFLite
@@ -73,5 +80,6 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.1")
     implementation("org.jsoup:jsoup:1.14.3")
     implementation("com.github.bumptech.glide:glide:4.12.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 }

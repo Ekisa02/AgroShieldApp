@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorOnPrimary" android:alpha="0.32"> <!-- Ripple using the text color on top of the primary color -->
+
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="?attr/colorPrimary" /> <!-- Uses your app's primary brand color -->
+            <corners android:radius="12dp" /> <!-- Consistent, modern rounding -->
+        </shape>
+    </item>
+
+</ripple>

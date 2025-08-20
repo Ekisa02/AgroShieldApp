@@ -91,10 +91,13 @@ public class MarketplaceAdpter extends BaseAdapter {
         TextView detailDescription = dialogView.findViewById(R.id.detailDescription);
         TextView detailHealth = dialogView.findViewById(R.id.detailHealth);
         TextView detailLocation = dialogView.findViewById(R.id.detailLocation);
+        //category
+        TextView detailCategory = dialogView.findViewById(R.id.detailcategory);
 
         // Load data
         loadBase64Image(detailImage, product.getImageBase64());
-
+        //category
+        detailCategory.setText(product.getCategory());
         detailName.setText(product.getName());
         detailPrice.setText(formatPrice(product.getPrice()));
         detailDescription.setText(product.getDescription());
@@ -136,14 +139,7 @@ public class MarketplaceAdpter extends BaseAdapter {
             imageView.setImageResource(R.drawable.placeholder_product);
         }
     }
-    private Bitmap base64ToBitmap(String base64Image) {
-        try {
-            byte[] decodedBytes = Base64.decode(base64Image, Base64.DEFAULT);
-            return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
-        } catch (Exception e) {
-            return null;
-        }
-    }
+
 
     private void showContactOptionsDialog(Marketplace product) {
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_contact_options, null);
@@ -202,12 +198,15 @@ public class MarketplaceAdpter extends BaseAdapter {
 
     private static class ViewHolder {
         private final ImageView productImage;
+        private final TextView productcategory;
         private final TextView productName;
         private final TextView productPrice;
         private final TextView productLocation;
 
         ViewHolder(View view) {
             productImage = view.findViewById(R.id.productImage);
+            //category
+            productcategory = view.findViewById(R.id.productcategory);
             productName = view.findViewById(R.id.productName);
             productPrice = view.findViewById(R.id.productPrice);
             productLocation = view.findViewById(R.id.productLocation);
@@ -222,7 +221,8 @@ public class MarketplaceAdpter extends BaseAdapter {
             } else {
                 productImage.setImageResource(R.drawable.placeholder_product);
             }
-
+            //category
+            productcategory.setText(product.getCategory());
             productName.setText(product.getName());
             productPrice.setText("KSh " + product.getPrice());
             productLocation.setText(product.getLocation());

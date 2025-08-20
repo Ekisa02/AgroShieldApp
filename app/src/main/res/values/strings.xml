@@ -12,4 +12,14 @@
     <string name="upload_encoding">Encoding image... %d%%</string>
     <string name="upload_uploading">Uploading data... %d%%</string>
     <string name="contact_seller">Contact Seller</string>
+    <string name="category_prompt">Select a category</string>
+
+    <string-array name="categories_array">
+        <item>All</item>
+        <item>Vegetables</item>
+        <item>Fruits</item>
+        <item>Grains</item>
+        <item>Livestock</item>
+        <item>Dairy</item>
+    </string-array>
 </resources>

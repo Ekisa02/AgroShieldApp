@@ -19,6 +19,7 @@ public class Marketplace {
     private String whatsapp;
     private String imageBase64;
     private String farmerId;
+    private String category; // Add category field
     private @ServerTimestamp Date timestamp;
 
     // Empty constructor needed for Firestore
@@ -45,6 +46,10 @@ public class Marketplace {
     public void setFarmerId(String farmerId) { this.farmerId = farmerId; }
     public Date getTimestamp() { return timestamp; }
     public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
+
+    // Category getter and setter
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
     // Standard WhatsApp getter
     public String getWhatsapp() {
@@ -109,5 +114,10 @@ public class Marketplace {
     // Formatted health info display
     public String getFormattedHealthInfo() {
         return healthInfo != null && !healthInfo.isEmpty() ? healthInfo : "No health info provided";
+    }
+
+    // Formatted category display
+    public String getFormattedCategory() {
+        return category != null && !category.isEmpty() ? category : "Uncategorized";
     }
 }

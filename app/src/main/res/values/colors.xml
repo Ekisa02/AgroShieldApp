@@ -83,6 +83,48 @@
     <color name="colorPrimaryDark">#388E3C</color>
     <color name="colorAccent">#81C784</color>
     <color name="whatsappGreen">#25D366</color>
+    <color name="category_default">#4CAF50</color>
+    <color name="category_selected">#FF9800</color>
+
+    <color name="buyerPrimary">#2196F3</color>
+    <color name="farmerPrimary">#4CAF50</color>
+    <color name="primaryDark">#212121</color>
+    <color name="green_500">#FF4CAF50</color> <!-- Example green -->
+    <color name="text_primary_dark">#DE000000</color> <!-- 87% Black -->
+
+    <color name="glow_purple">#B84CFF</color>
+    <color name="glow_blue">#4C79FF</color>
+    <color name="glow_cyan">#4CC8FF</color>
+    <color name="gold_glow">#FFE169</color>
+    <color name="light_white">#B3FFFFFF</color>
+    <color name="primary_text_dark">#E6E6E6</color>
+    <color name="secondary_text_dark">#999999</color>
+    <color name="primary_icon_tint">#E6E6E6</color>
+    <color name="error_glow">#FF4C6E</color>
+
+
+
+        <!-- Background Colors -->
+        <color name="background">#0C0B20</color>
+        <color name="surface">#1E1A3C</color>
+
+
+        <!-- Text Colors -->
+        <color name="text_primary">#FFFFFF</color>
+        <color name="text_secondary">#B3FFFFFF</color>
+
+        <color name="text_secondary_dark">#66000000</color>
+
+        <!-- Icon Colors -->
+        <color name="icon_primary">#FFFFFF</color>
+        <color name="icon_secondary">#B3FFFFFF</color>
+        <color name="icon_primary_dark">#000000</color>
+        <color name="icon_accent">#FF5E7D</color>
+
+        <!-- Button Colors -->
+        <color name="button_primary">#FF5E7D</color>
+        <color name="button_secondary">#9B5CFF</color>
+
 
 
 </resources>

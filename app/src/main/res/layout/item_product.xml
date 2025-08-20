@@ -36,6 +36,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"/>
 
+
             <!-- Details Panel (initially hidden) -->
             <LinearLayout
                 android:id="@+id/detailsPanel"
@@ -54,6 +55,7 @@
                     android:textColor="#FFFFFF"
                     android:textSize="16sp"
                     android:textStyle="bold"/>
+
 
                 <TextView
                     android:id="@+id/productDescription"

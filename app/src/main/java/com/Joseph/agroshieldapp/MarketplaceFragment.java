@@ -1,18 +1,23 @@
 package com.Joseph.agroshieldapp;
 
+import static com.Joseph.agroshieldapp.R.*;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.view.animation.OvershootInterpolator;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -20,12 +25,16 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
 import com.Joseph.agroshieldapp.Adpters.MarketplaceAdpter;
@@ -38,7 +47,6 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -46,7 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class MarketplaceFragment extends Fragment {
 
@@ -58,15 +65,22 @@ public class MarketplaceFragment extends Fragment {
     private ProgressBar progressBar;
     private LinearLayout errorStateView, emptyStateView;
     private Button postProductButton;
+    private EditText searchEditText;
+    private Button searchButton;
+    private LinearLayout categoriesLayout;
 
     private FirebaseFirestore firestore;
     private FirebaseStorage storage;
     private FirebaseUser currentUser;
 
     private List<Marketplace> productList = new ArrayList<>();
+    private List<Marketplace> filteredProductList = new ArrayList<>();
     private MarketplaceAdpter adapter;
     private Uri selectedImageUri;
     private View dialogView; // Store dialog view reference for image updates
+
+    private String currentCategory = "All";
+    private String currentSearchQuery = "";
 
     @Nullable
     @Override
@@ -79,6 +93,9 @@ public class MarketplaceFragment extends Fragment {
         errorStateView = view.findViewById(R.id.errorStateView);
         emptyStateView = view.findViewById(R.id.emptyStateView);
         postProductButton = view.findViewById(R.id.postProductButton);
+        searchEditText = view.findViewById(R.id.searchEditText);
+        searchButton = view.findViewById(R.id.searchButton);
+        categoriesLayout = view.findViewById(R.id.categoriesLayout);
 
         // Initialize Firebase
         firestore = FirebaseFirestore.getInstance();
@@ -86,7 +103,7 @@ public class MarketplaceFragment extends Fragment {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         // Setup adapter
-        adapter = new MarketplaceAdpter(getContext(), productList);
+        adapter = new MarketplaceAdpter(getContext(), filteredProductList);
         productsGridView.setAdapter(adapter);
 
         // Check user role
@@ -97,12 +114,99 @@ public class MarketplaceFragment extends Fragment {
 
         // Set click listeners
         postProductButton.setOnClickListener(v -> showProductPostDialog());
-
         productsGridView.setOnItemClickListener((parent, view1, position, id) -> toggleProductDetails(position, view1));
+
+        // Setup search functionality
+        setupSearchFunctionality();
+
+        // Setup category buttons
+        setupCategoryButtons();
 
         return view;
     }
 
+    private void setupSearchFunctionality() {
+        // Search button click listener
+        searchButton.setOnClickListener(v -> {
+            currentSearchQuery = searchEditText.getText().toString().trim();
+            filterProducts(currentCategory, currentSearchQuery);
+        });
+
+        // Real-time search as user types
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                currentSearchQuery = s.toString().trim();
+                filterProducts(currentCategory, currentSearchQuery);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+    }
+
+    private void setupCategoryButtons() {
+        // Set click listeners for all category buttons
+        for (int i = 0; i < categoriesLayout.getChildCount(); i++) {
+            View child = categoriesLayout.getChildAt(i);
+            if (child instanceof Button) {
+                Button categoryButton = (Button) child;
+                categoryButton.setOnClickListener(v -> {
+                    // Reset all buttons to default color
+                    for (int j = 0; j < categoriesLayout.getChildCount(); j++) {
+                        View childBtn = categoriesLayout.getChildAt(j);
+                        if (childBtn instanceof Button) {
+                            ((Button) childBtn).setBackgroundTintList(
+                                    getResources().getColorStateList(R.color.category_default)
+                            );
+                        }
+                    }
+
+                    // Set selected button to active color
+                    categoryButton.setBackgroundTintList(
+                            getResources().getColorStateList(R.color.category_selected)
+                    );
+
+                    // Filter by category
+                    currentCategory = categoryButton.getText().toString();
+                    filterProducts(currentCategory, currentSearchQuery);
+                });
+            }
+        }
+    }
+
+    private void filterProducts(String category, String searchQuery) {
+        filteredProductList.clear();
+
+        for (Marketplace product : productList) {
+            boolean matchesCategory = category.equals("All") ||
+                    (product.getCategory() != null &&
+                            product.getCategory().equals(category));
+
+            boolean matchesSearch = searchQuery.isEmpty() ||
+                    (product.getName() != null &&
+                            product.getName().toLowerCase().contains(searchQuery.toLowerCase())) ||
+                    (product.getDescription() != null &&
+                            product.getDescription().toLowerCase().contains(searchQuery.toLowerCase()));
+
+            if (matchesCategory && matchesSearch) {
+                filteredProductList.add(product);
+            }
+        }
+
+        adapter.notifyDataSetChanged();
+
+        // Show empty state if no products match the filter
+        if (filteredProductList.isEmpty()) {
+            showEmptyState();
+        } else {
+            emptyStateView.setVisibility(View.GONE);
+            productsGridView.setVisibility(View.VISIBLE);
+        }
+    }
 
     private void showLoadingDialog() {
         if (loadingDialog == null) {
@@ -120,25 +224,61 @@ public class MarketplaceFragment extends Fragment {
     }
 
     private void checkUserRole() {
-        String[] options = {"Browse as Buyer", "Post Products as Farmer"};
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("How would you like to proceed?")
-                .setItems(options, (dialog, which) -> {
-                    switch (which) {
-                        case 0: // Buyer
-                            postProductButton.setVisibility(View.GONE);
-                            break;
-                        case 1: // Farmer
-                            if (currentUser == null) {
-                                showLoginPrompt();
-                            } else {
-                                postProductButton.setVisibility(View.VISIBLE);
-                            }
-                            break;
-                    }
-                })
+        // Inflate custom dialog layout
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_role_selection, null);
+
+        // Initialize views
+        TextView title = dialogView.findViewById(R.id.dialogTitle);
+        CardView buyerCard = dialogView.findViewById(R.id.buyerCard);
+        CardView farmerCard = dialogView.findViewById(R.id.farmerCard);
+        ImageView buyerIcon = dialogView.findViewById(R.id.buyerIcon);
+        ImageView farmerIcon = dialogView.findViewById(R.id.farmerIcon);
+        TextView buyerText = dialogView.findViewById(R.id.buyerText);
+        TextView farmerText = dialogView.findViewById(R.id.farmerText);
+
+        // Create the dialog
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext(), R.style.CustomRoleDialogStyle)
+                .setView(dialogView)
                 .setCancelable(false)
-                .show();
+                .create();
+
+        // Set click listeners
+        buyerCard.setOnClickListener(v -> {
+            postProductButton.setVisibility(View.GONE);
+            dialog.dismiss();
+        });
+
+        farmerCard.setOnClickListener(v -> {
+            if (currentUser == null) {
+                dialog.dismiss();
+                showLoginPrompt();
+            } else {
+                postProductButton.setVisibility(View.VISIBLE);
+                dialog.dismiss();
+            }
+        });
+
+        // Show the dialog
+        dialog.show();
+
+        // Add animation to cards
+        animateCardEntrance(buyerCard, 0);
+        animateCardEntrance(farmerCard, 100);
+    }
+
+    private void animateCardEntrance(View card, long delay) {
+        card.setAlpha(0f);
+        card.setScaleX(0.8f);
+        card.setScaleY(0.8f);
+
+        card.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(400)
+                .setStartDelay(delay)
+                .setInterpolator(new OvershootInterpolator())
+                .start();
     }
 
     private void showLoginPrompt() {
@@ -147,14 +287,15 @@ public class MarketplaceFragment extends Fragment {
                 .setMessage("You need to be logged in to post products. Would you like to login now?")
                 .setPositiveButton("Login", (dialog, which) -> {
                     // Navigate to login screen
-                    // findNavController().navigate(R.id.action_to_login);
-                })
+                    startActivity(new Intent(requireContext(), LoginActivity.class));
+                }) // ← Closing the lambda properly
                 .setNegativeButton("Cancel", (dialog, which) -> {
                     dialog.dismiss();
                     postProductButton.setVisibility(View.GONE);
                 })
                 .show();
     }
+
 
     private void loadProducts() {
         showLoadingDialog();
@@ -180,7 +321,8 @@ public class MarketplaceFragment extends Fragment {
                         if (productList.isEmpty()) {
                             showEmptyState();
                         } else {
-                            adapter.notifyDataSetChanged();
+                            // Apply current filters
+                            filterProducts(currentCategory, currentSearchQuery);
                         }
                     } else {
                         showErrorState(task.getException() != null ?
@@ -190,6 +332,7 @@ public class MarketplaceFragment extends Fragment {
     }
 
     private void showProductPostDialog() {
+        // Inflate the dialog layout
         dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_post_product, null);
         AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Post Your Product")
@@ -198,14 +341,31 @@ public class MarketplaceFragment extends Fragment {
                 .setNegativeButton("Cancel", null)
                 .create();
 
+        // Initialize dialog views
         ImageView imageView = dialogView.findViewById(R.id.productImageView);
         Button selectImageBtn = dialogView.findViewById(R.id.selectImageButton);
+        Spinner categorySpinner = dialogView.findViewById(R.id.categorySpinner);
 
+        // ==================== CATEGORY SPINNER SETUP ====================
+        // Create an adapter for the spinner using the categories array from resources
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(requireContext(),
+                R.array.categories_array, android.R.layout.simple_spinner_item);
+
+        // Specify the layout for the dropdown items
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // Apply the adapter to the spinner
+        categorySpinner.setAdapter(spinnerAdapter);
+        // ==================== END CATEGORY SPINNER SETUP ====================
+
+        // Set click listener for image selection
         selectImageBtn.setOnClickListener(v -> openImagePicker());
 
+        // Handle the positive button click (Post button)
         dialog.setOnShowListener(dialogInterface -> {
             Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
             positiveButton.setOnClickListener(v -> {
+                // Get references to all input fields
                 EditText nameEditText = dialogView.findViewById(R.id.productNameEditText);
                 EditText priceEditText = dialogView.findViewById(R.id.productPriceEditText);
                 EditText descriptionEditText = dialogView.findViewById(R.id.productDescriptionEditText);
@@ -214,6 +374,12 @@ public class MarketplaceFragment extends Fragment {
                 EditText phoneEditText = dialogView.findViewById(R.id.phoneEditText);
                 EditText whatsappEditText = dialogView.findViewById(R.id.whatsappEditText);
 
+                // ==================== GET SELECTED CATEGORY ====================
+                // Get the selected category from the spinner
+                String category = categorySpinner.getSelectedItem().toString();
+                // ==================== END GET SELECTED CATEGORY ====================
+
+                // Extract text from input fields
                 String name = nameEditText.getText().toString();
                 String price = priceEditText.getText().toString();
                 String description = descriptionEditText.getText().toString();
@@ -222,22 +388,51 @@ public class MarketplaceFragment extends Fragment {
                 String phone = phoneEditText.getText().toString();
                 String whatsapp = whatsappEditText.getText().toString();
 
-                if (validateProductInput(name, price, description, healthInfo, location, phone)) {
+                // Validate input fields (including category)
+                if (validateProductInput(name, price, description, healthInfo, location, phone, category)) {
                     if (selectedImageUri != null) {
+                        // If validation passes and image is selected, proceed with upload
                         uploadImageAndPostProduct(
                                 name, price, description, healthInfo,
-                                location, phone, whatsapp, dialog
+                                location, phone, whatsapp, category, dialog
                         );
                     } else {
                         Toast.makeText(requireContext(), "Please select an image", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
+
+            // ==================== ENHANCED BUTTON STYLING ====================
+            // Get the negative button here to style it
+            Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+
+            // Apply background drawables
+            positiveButton.setBackgroundResource(R.drawable.btn_dialog_positive);
+            negativeButton.setBackgroundResource(R.drawable.btn_dialog_negative);
+
+            // Style text colors
+            positiveButton.setTextColor(getResources().getColor(color.premium_gold));
+            negativeButton.setTextColor(ContextCompat.getColor(requireContext(), color.white));
+
+            // Add padding for a better touch area and appearance
+            int paddingHorizontal = getResources().getDimensionPixelSize(R.dimen.dialog_button_padding_horizontal);
+            int paddingVertical = getResources().getDimensionPixelSize(R.dimen.dialog_button_padding_vertical);
+            positiveButton.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical);
+            negativeButton.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical);
+
+            // Set a minimum width for visual balance
+            int minWidth = getResources().getDimensionPixelSize(R.dimen.dialog_button_min_width);
+            positiveButton.setMinWidth(minWidth);
+            negativeButton.setMinWidth(minWidth);
+
+            // Optional: Set a click listener for the negative button if you need custom behavior beyond dismissing.
+            // The default behavior (dismiss) is already handled by the AlertDialog.
+            // negativeButton.setOnClickListener(v -> dialog.dismiss());
         });
 
+        // Show the dialog
         dialog.show();
     }
-
     private void openImagePicker() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -246,7 +441,8 @@ public class MarketplaceFragment extends Fragment {
     }
 
     private boolean validateProductInput(String name, String price, String description,
-                                         String healthInfo, String location, String phone) {
+                                         String healthInfo, String location, String phone, String category) {
+        // Validate all required fields
         if (name.isEmpty()) {
             Toast.makeText(requireContext(), "Product name is required", Toast.LENGTH_SHORT).show();
             return false;
@@ -267,18 +463,27 @@ public class MarketplaceFragment extends Fragment {
             Toast.makeText(requireContext(), "Phone number is required", Toast.LENGTH_SHORT).show();
             return false;
         }
+        // ==================== CATEGORY VALIDATION ====================
+        // Validate that a category is selected (not the default prompt)
+        if (category.equals(getString(R.string.category_prompt))) {
+            Toast.makeText(requireContext(), "Please select a category", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        // ==================== END CATEGORY VALIDATION ====================
+
         return true;
     }
 
-    // Update your uploadImageAndPostProduct method:
+    // Updated uploadImageAndPostProduct method with category parameter
     private void uploadImageAndPostProduct(String name, String price, String description,
                                            String healthInfo, String location, String phone,
-                                           String whatsapp, AlertDialog dialog) {
+                                           String whatsapp, String category, AlertDialog dialog) {
         if (selectedImageUri == null) {
             Toast.makeText(requireContext(), "Please select an image first", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Show progress dialog for upload process
         ProgressDialog progressDialog = new ProgressDialog(requireContext());
         progressDialog.setTitle("Uploading Product");
         progressDialog.setMessage("Preparing image... 0%");
@@ -287,6 +492,7 @@ public class MarketplaceFragment extends Fragment {
         progressDialog.setMax(100);
         progressDialog.show();
 
+        // Run upload process in background thread
         new Thread(() -> {
             try {
                 // Step 1: Read and compress image (with progress)
@@ -327,7 +533,7 @@ public class MarketplaceFragment extends Fragment {
                     progressDialog.setProgress(50);
                 });
 
-                // Create product data
+                // Create product data with all fields including category
                 Map<String, Object> product = new HashMap<>();
                 product.put("name", name);
                 product.put("price", price);
@@ -336,6 +542,9 @@ public class MarketplaceFragment extends Fragment {
                 product.put("location", location);
                 product.put("phone", phone);
                 product.put("whatsapp", whatsapp);
+                // ==================== ADD CATEGORY TO PRODUCT DATA ====================
+                product.put("category", category); // Add the selected category
+                // ==================== END ADD CATEGORY TO PRODUCT DATA ====================
                 product.put("imageBase64", base64Image);
                 product.put("farmerId", currentUser.getUid());
                 product.put("timestamp", FieldValue.serverTimestamp());
@@ -347,7 +556,7 @@ public class MarketplaceFragment extends Fragment {
                             progressDialog.dismiss();
                             dialog.dismiss();
                             Toast.makeText(requireContext(), "Product posted successfully", Toast.LENGTH_SHORT).show();
-                            loadProducts();
+                            loadProducts(); // Reload products to show the new one
                         })
                         .addOnFailureListener(e -> {
                             progressDialog.dismiss();
@@ -372,8 +581,9 @@ public class MarketplaceFragment extends Fragment {
             }
         }).start();
     }
+
     private void toggleProductDetails(int position, View view) {
-        Marketplace product = productList.get(position);
+        Marketplace product = filteredProductList.get(position);
         LinearLayout panel = view.findViewById(R.id.detailsPanel);
 
         if (panel.getVisibility() == View.VISIBLE) {
@@ -432,7 +642,6 @@ public class MarketplaceFragment extends Fragment {
             }
         }
     }
-
 
     private void showEmptyState() {
         emptyStateView.setVisibility(View.VISIBLE);

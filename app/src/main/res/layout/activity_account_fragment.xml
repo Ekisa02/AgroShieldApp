@@ -1,403 +1,498 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/surface_variant">
+    android:fitsSystemWindows="true"
+    android:background="@drawable/gradient_background">
 
     <!-- Main Container -->
     <LinearLayout
+        android:id="@+id/mainContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="8dp">
+
 
         <!-- 𝗛𝗲𝗮𝗱𝗲𝗿 𝗦𝗲𝗰𝘁𝗶𝗼𝗻 -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/profileCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
-            app:strokeColor="@color/outline_variant"
-            app:strokeWidth="1dp">
+            android:layout_margin="12dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="8dp"
+            app:strokeColor="@color/glow_purple"
+            app:strokeWidth="2dp">
 
-            <LinearLayout
+            <!-- Glowing border effect -->
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp">
+                android:layout_height="match_parent">
 
-                <!-- Profile Row -->
+                <View
+                    android:id="@+id/glowBorderView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/glow_border" />
+
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:orientation="vertical"
+                    android:padding="24dp"
+                    android:background="@drawable/card_gradient">
 
-                    <!-- Profile Image with Badge -->
-                    <RelativeLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
-
-                        <com.google.android.material.imageview.ShapeableImageView
-                            android:id="@+id/profileImage"
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
-                            android:src="@drawable/ic_profile_placeholder"
-                            app:shapeAppearanceOverlay="@style/CircleImageView"
-                            android:elevation="4dp"/>
-
-                        <!-- Edit Pencil -->
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_edit"
-                            android:background="@drawable/circle_accent_bg"
-                            android:layout_alignBottom="@id/profileImage"
-                            android:layout_alignEnd="@id/profileImage"
-                            android:layout_marginEnd="-8dp"/>
-                    </RelativeLayout>
-
-                    <!-- Name & Membership -->
+                    <!-- Profile Row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:orientation="vertical">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
 
-                        <TextView
-                            android:id="@+id/userName"
+                        <!-- Profile Image with Badge -->
+                        <RelativeLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Alex Farmer"
-                            android:textColor="@color/primary_text"
-                            android:textSize="22sp"
-                            android:textStyle="bold"/>
+                            android:layout_height="wrap_content">
 
-                        <com.google.android.material.chip.Chip
-                            android:layout_width="wrap_content"
+                            <com.google.android.material.imageview.ShapeableImageView
+                                android:id="@+id/profileImage"
+                                android:layout_width="80dp"
+                                android:layout_height="80dp"
+                                android:src="@drawable/ic_profile_placeholder"
+                                app:shapeAppearanceOverlay="@style/CircleImageView"
+                                android:elevation="8dp"
+                                android:background="@drawable/profile_border_gradient"/>
+
+                            <!-- Edit Pencil with glow -->
+                            <ImageView
+                                android:id="@+id/editProfileBtn"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:contentDescription="profile image"
+                                android:src="@drawable/ic_edit"
+                                android:background="@drawable/circle_accent_glow"
+                                android:layout_alignBottom="@id/profileImage"
+                                android:layout_alignEnd="@id/profileImage"
+                                android:layout_marginEnd="-8dp"
+                                android:elevation="12dp"/>
+                        </RelativeLayout>
+
+                        <!-- Name & Membership -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="Premium Member"
-                            app:chipBackgroundColor="@color/premium_gold"
-                            app:chipIcon="@drawable/ic_premium"
-                            app:chipIconTint="@color/white"/>
+                            android:layout_marginStart="20dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/userName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Alex Farmer"
+                                android:textColor="@android:color/white"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                android:shadowColor="#80000000"
+                                android:shadowDx="2"
+                                android:shadowDy="2"
+                                android:shadowRadius="4"/>
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/premiumChip"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="Premium Member"
+                                android:textAllCaps="true"
+                                android:background="@drawable/premium_gold_gradient"
+                                android:textColor="@color/vibrant_purple_2"
+                                app:chipIcon="@drawable/ic_premium"
+                                app:chipIconTint="@color/category_selected"
+                                app:chipStrokeColor="@color/gold_glow"
+                                app:chipStrokeWidth="2dp"
+                                android:elevation="4dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Stats Row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:orientation="horizontal"
+                        android:gravity="center">
+
+
+                        <!-- Followers -->
+                        <LinearLayout
+                            android:id="@+id/followersSection"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/followersCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@android:color/white"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:shadowColor="#80000000"
+                                android:shadowDx="1"
+                                android:shadowDy="1"
+                                android:shadowRadius="2"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Followers"
+                                android:textColor="#B3FFFFFF"
+                                android:textSize="14sp"/>
+                        </LinearLayout>
+
+                        <!-- Divider -->
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="28dp"
+                            android:background="@drawable/vertical_gradient_divider"/>
+
+                        <!-- Following -->
+                        <LinearLayout
+                            android:id="@+id/followingSection"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/followingCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@android:color/white"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:shadowColor="#80000000"
+                                android:shadowDx="1"
+                                android:shadowDy="1"
+                                android:shadowRadius="2"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Following"
+                                android:textColor="#B3FFFFFF"
+                                android:textSize="14sp"/>
+                        </LinearLayout>
+
+                        <!-- Divider -->
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="28dp"
+                            android:background="@drawable/vertical_gradient_divider"/>
+
+                        <!-- Member Since -->
+                        <LinearLayout
+                            android:id="@+id/memberSinceSection"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/memberSinceYear"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="2025"
+                                android:textColor="@android:color/white"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:shadowColor="#80000000"
+                                android:shadowDx="1"
+                                android:shadowDy="1"
+                                android:shadowRadius="2"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Member Since"
+                                android:textColor="#B3FFFFFF"
+                                android:textSize="14sp"/>
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
-
-                <!-- Stats Row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:orientation="horizontal"
-                    android:gravity="center">
-
-                    <!-- Joined Date -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="2.5K"
-                            android:textColor="@color/primary_text"
-                            android:textSize="18sp"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Followers"
-                            android:textColor="@color/secondary_text"
-                            android:textSize="12sp"/>
-                    </LinearLayout>
-
-                    <!-- Divider -->
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="24dp"
-                        android:background="@color/outline_variant"/>
-
-                    <!-- Followers -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="1.2K"
-                            android:textColor="@color/primary_text"
-                            android:textSize="18sp"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Following"
-                            android:textColor="@color/secondary_text"
-                            android:textSize="12sp"/>
-                    </LinearLayout>
-
-                    <!-- Divider -->
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="24dp"
-                        android:background="@color/outline_variant"/>
-
-                    <!-- Member Since -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="2020"
-                            android:textColor="@color/primary_text"
-                            android:textSize="18sp"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Member Since"
-                            android:textColor="@color/secondary_text"
-                            android:textSize="12sp"/>
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
+            </RelativeLayout>
         </com.google.android.material.card.MaterialCardView>
-
         <!-- 𝗔𝗰𝗰𝗼𝘂𝗻𝘁 𝗢𝗽𝘁𝗶𝗼𝗻𝘀 -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/accountSettingsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
+            android:layout_marginHorizontal="12dp"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
+            app:cardCornerRadius="20dp"
+            app:cardElevation="6dp"
+            app:strokeColor="@color/glow_blue"
+            app:strokeWidth="1dp">
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="match_parent">
 
-                <!-- Section Header -->
-                <TextView
+                <View
+                    android:id="@+id/accountGlowBorderView"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Account Settings"
-                    android:textColor="@color/primary_text"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:paddingStart="24dp"
-                    android:paddingTop="16dp"
-                    android:paddingEnd="24dp"
-                    android:paddingBottom="8dp"/>
+                    android:layout_height="match_parent"
+                    android:background="@drawable/soft_glow_border" />
 
-                <!-- Options List -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:background="@drawable/card_light_gradient">
 
-                    <!-- Personal Info -->
-                    <com.google.android.material.button.MaterialButton
-                        style="@style/Widget.Material3.Button.TextButton"
+                    <!-- Section Header -->
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:drawableStart="@drawable/ic_person"
-                        android:drawablePadding="16dp"
-                        android:drawableTint="@color/primary_icon"
-                        android:gravity="start|center_vertical"
+                        android:text="Account Settings"
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
                         android:paddingStart="24dp"
-                        android:text="Personal Information"
-                        android:textColor="@color/primary_text"
-                        app:iconGravity="start"/>
+                        android:paddingTop="20dp"
+                        android:paddingEnd="24dp"
+                        android:paddingBottom="12dp"/>
 
-                    <!-- Notifications -->
-                    <com.google.android.material.button.MaterialButton
-                        style="@style/Widget.Material3.Button.TextButton"
+                    <!-- Options List -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:drawableStart="@drawable/ic_notifications"
-                        android:drawablePadding="16dp"
-                        android:drawableTint="@color/primary_icon"
-                        android:gravity="start|center_vertical"
-                        android:paddingStart="24dp"
-                        android:text="Notifications"
-                        android:textColor="@color/primary_text"
-                        app:iconGravity="start"/>
+                        android:orientation="vertical">
 
-                    <!-- Payment -->
-                    <com.google.android.material.button.MaterialButton
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:drawableStart="@drawable/ic_payment"
-                        android:drawablePadding="16dp"
-                        android:drawableTint="@color/primary_icon"
-                        android:gravity="start|center_vertical"
-                        android:paddingStart="24dp"
-                        android:text="Payment Methods"
-                        android:textColor="@color/primary_text"
-                        app:iconGravity="start"/>
+                        <!-- Personal Info -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/personalInfoBtn"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:drawableStart="@drawable/ic_person"
+                            android:drawablePadding="16dp"
+                            android:drawableTint="#FF6200EE"
+                            android:gravity="start|center_vertical"
+                            android:paddingStart="24dp"
+                            android:text="Personal Information"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            app:iconGravity="start"/>
 
-                    <!-- Security -->
-                    <com.google.android.material.button.MaterialButton
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:drawableStart="@drawable/ic_security"
-                        android:drawablePadding="16dp"
-                        android:drawableTint="@color/primary_icon"
-                        android:gravity="start|center_vertical"
-                        android:paddingStart="24dp"
-                        android:text="Security"
-                        android:textColor="@color/primary_text"
-                        app:iconGravity="start"/>
+                        <!-- Notifications -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/notificationsBtn"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:drawableStart="@drawable/ic_notifications"
+                            android:drawablePadding="16dp"
+                            android:drawableTint="#FF6200EE"
+                            android:gravity="start|center_vertical"
+                            android:paddingStart="24dp"
+                            android:text="Notifications"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            app:iconGravity="start"/>
 
-                    <!-- Help -->
-                    <com.google.android.material.button.MaterialButton
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:drawableStart="@drawable/ic_help"
-                        android:drawablePadding="16dp"
-                        android:drawableTint="@color/primary_icon"
-                        android:gravity="start|center_vertical"
-                        android:paddingStart="24dp"
-                        android:text="Help Center"
-                        android:textColor="@color/primary_text"
-                        app:iconGravity="start"/>
+                        <!-- Payment -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/paymentBtn"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:drawableStart="@drawable/ic_payment"
+                            android:drawablePadding="16dp"
+                            android:drawableTint="#FF6200EE"
+                            android:gravity="start|center_vertical"
+                            android:paddingStart="24dp"
+                            android:text="Payment Methods"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            app:iconGravity="start"/>
 
-                    <!-- Divider -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="8dp"
-                        android:background="@color/outline_variant"/>
+                        <!-- Security -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/securityBtn"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:drawableStart="@drawable/ic_security"
+                            android:drawablePadding="16dp"
+                            android:drawableTint="#FF6200EE"
+                            android:gravity="start|center_vertical"
+                            android:paddingStart="24dp"
+                            android:text="Security"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            app:iconGravity="start"/>
 
-                    <!-- Logout -->
-                    <com.google.android.material.button.MaterialButton
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:drawableStart="@drawable/ic_logout"
-                        android:drawablePadding="16dp"
-                        android:drawableTint="@color/error"
-                        android:gravity="start|center_vertical"
-                        android:paddingStart="24dp"
-                        android:text="Log Out"
-                        android:textColor="@color/error"
-                        app:iconGravity="start"/>
+                        <!-- Help -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/helpBtn"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:drawableStart="@drawable/ic_help"
+                            android:drawablePadding="16dp"
+                            android:drawableTint="#FF6200EE"
+                            android:gravity="start|center_vertical"
+                            android:paddingStart="24dp"
+                            android:text="Help Center"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            app:iconGravity="start"/>
+
+                        <!-- Divider -->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="8dp"
+                            android:background="@drawable/gradient_divider"/>
+
+                        <!-- Logout -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/logoutBtn"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:drawableStart="@drawable/ic_logout"
+                            android:drawablePadding="16dp"
+                            android:drawableTint="#FF0000"
+                            android:gravity="start|center_vertical"
+                            android:paddingStart="24dp"
+                            android:text="Log Out"
+                            android:textColor="#FF0000"
+                            android:textSize="15sp"
+                            app:iconGravity="start"/>
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
+            </RelativeLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!-- 𝗔𝗽𝗽 𝗦𝗲𝘁𝘁𝗶𝗻𝗴𝘀 -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/appSettingsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
+            android:layout_marginHorizontal="12dp"
             android:layout_marginBottom="24dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
+            app:cardCornerRadius="20dp"
+            app:cardElevation="6dp"
+            app:strokeColor="@color/glow_cyan"
+            app:strokeWidth="1dp">
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="match_parent">
 
-                <!-- Section Header -->
-                <TextView
+                <View
+                    android:id="@+id/appGlowBorderView"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="App Settings"
-                    android:textColor="@color/primary_text"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:paddingStart="24dp"
-                    android:paddingTop="16dp"
-                    android:paddingEnd="24dp"
-                    android:paddingBottom="8dp"/>
+                    android:layout_height="match_parent"
+                    android:background="@drawable/soft_glow_border" />
 
-                <!-- Dark Mode Toggle -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="16dp"
-                    android:paddingVertical="12dp">
+                    android:orientation="vertical"
+                    android:background="@drawable/card_light_gradient">
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_dark_mode"
-                        app:tint="@color/primary_icon" />
-
+                    <!-- Section Header -->
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="Dark Mode"
-                        android:textColor="@color/primary_text"
-                        android:textSize="14sp"/>
+                        android:text="App Settings"
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:paddingStart="24dp"
+                        android:paddingTop="20dp"
+                        android:paddingEnd="24dp"
+                        android:paddingBottom="12dp"/>
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/darkModeSwitch"
-                        android:layout_width="wrap_content"
+                    <!-- Dark Mode Toggle -->
+                    <LinearLayout
+                        android:id="@+id/darkModeSection"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:checked="false"/>
+                        android:orientation="horizontal"
+                        android:paddingStart="24dp"
+                        android:paddingEnd="16dp"
+                        android:paddingVertical="12dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_dark_mode"
+                            app:tint="#FF6200EE" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="16dp"
+                            android:text="Dark Mode"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"/>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/darkModeSwitch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="false"/>
+                    </LinearLayout>
+
+                    <!-- Language -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/languageBtn"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:drawableStart="@drawable/ic_language"
+                        android:drawablePadding="16dp"
+                        android:drawableTint="#FF6200EE"
+                        android:gravity="start|center_vertical"
+                        android:paddingStart="24dp"
+                        android:text="Language: English"
+                        android:textColor="@android:color/black"
+                        android:textSize="15sp"
+                        app:iconGravity="start"/>
+
+                    <!-- App Version -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="AgroShield v2.4.1"
+                        android:textColor="#666666"
+                        android:textSize="12sp"
+                        android:gravity="center"
+                        android:padding="16dp"/>
                 </LinearLayout>
-
-                <!-- Language -->
-                <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:drawableStart="@drawable/ic_language"
-                    android:drawablePadding="16dp"
-                    android:drawableTint="@color/primary_icon"
-                    android:gravity="start|center_vertical"
-                    android:paddingStart="24dp"
-                    android:text="Language: English"
-                    android:textColor="@color/primary_text"
-                    app:iconGravity="start"/>
-
-                <!-- App Version -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="AgroShield v2.4.1"
-                    android:textColor="@color/secondary_text"
-                    android:textSize="12sp"
-                    android:gravity="center"
-                    android:padding="16dp"/>
-            </LinearLayout>
+            </RelativeLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </ScrollView>
