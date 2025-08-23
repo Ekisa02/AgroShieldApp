@@ -1,465 +1,373 @@
 package com.Joseph.agroshieldapp;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
+import com.google.android.gms.tasks.Tasks;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.face.Face;
+import com.google.mlkit.vision.face.FaceDetection;
+import com.google.mlkit.vision.face.FaceDetector;
+import com.google.mlkit.vision.face.FaceDetectorOptions;
+
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.exifinterface.media.ExifInterface;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
-import com.canhub.cropper.CropImage;
-import com.canhub.cropper.CropImageActivity;
-import com.canhub.cropper.CropImageView;
-import androidx.exifinterface.media.ExifgitInterface;
-import com.canhub.cropper.CropImage;
-import com.canhub.cropper.CropImageView;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import com.google.firebase.firestore.SetOptions;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private static final String TAG = "ProfileActivity";
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final int REQUEST_IMAGE_PICK = 2;
-    private static final int REQUEST_PERMISSIONS = 3;
-
-    // Firebase
-    private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
-    private FirebaseFirestore db;
-    private StorageReference storageRef;
-
-    // Views
+    // UI
     private ImageView profileImageView;
     private ImageButton btnChangePhoto;
     private Button btnSave;
+    private ProgressBar progressBar;
+    private TextView tvStatus;
+    private ScrollView mainContent;
 
-    // Image handling
-    private Uri currentImageUri;
-    private String currentBase64Image;
-    private boolean imageModified = false;
+    // Data
+    private Uri selectedImageUri = null;
+    private String selectedImageBase64 = null;
 
-    // Permissions
-    private static final String[] REQUIRED_PERMISSIONS;
+    // Async
+    private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    static {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            REQUIRED_PERMISSIONS = new String[]{
-                    android.Manifest.permission.CAMERA,
-                    android.Manifest.permission.READ_MEDIA_IMAGES
-            };
-        } else {
-            REQUIRED_PERMISSIONS = new String[]{
-                    android.Manifest.permission.CAMERA,
-                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-            };
-        }
-    }
+    // Pick image launcher (system picker: no runtime storage permission needed)
+    private ActivityResultLauncher<String> pickImageLauncher;
+
+    private static final String KEY_STATE_BASE64 = "state_base64";
+    private static final String KEY_STATE_IMAGE_URI = "state_image_uri";
+    private static final String TAG = "ProfileActivity";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        initializeFirebase();
-        initializeViews();
-        setupClickListeners();
-        loadUserProfile();
+        bindViews();
+        setupPickImageLauncher();
+        setupListeners();
+
+        restoreState(savedInstanceState);
+        updateUiState(false);
     }
 
-    private void initializeFirebase() {
-        try {
-            mAuth = FirebaseAuth.getInstance();
-            currentUser = mAuth.getCurrentUser();
-            db = FirebaseFirestore.getInstance();
-            storageRef = FirebaseStorage.getInstance().getReference();
-        } catch (Exception e) {
-            Log.e(TAG, "Firebase initialization failed: " + e.getMessage());
-            showError("Database initialization failed");
-        }
-    }
-
-    private void initializeViews() {
+    private void bindViews() {
         profileImageView = findViewById(R.id.profileImageView);
         btnChangePhoto = findViewById(R.id.btnChangePhoto);
         btnSave = findViewById(R.id.btnSave);
+        progressBar = findViewById(R.id.progressBar);
+        tvStatus = findViewById(R.id.tvStatus);
+        mainContent = findViewById(R.id.mainContent);
 
-        // Set circular transformation for profile image
-        RequestOptions requestOptions = new RequestOptions()
-                .circleCrop()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .placeholder(R.drawable.ic_profile_placeholder)
-                .error(R.drawable.ic_profile_placeholder);
-
-        Glide.with(this)
-                .load(R.drawable.ic_profile_placeholder)
-                .apply(requestOptions)
-                .into(profileImageView);
+        // ProgressBar as indeterminate
+        progressBar.setIndeterminate(true);
     }
 
-    private void setupClickListeners() {
-        btnChangePhoto.setOnClickListener(v -> handleImageSelection());
-        btnSave.setOnClickListener(v -> saveProfileImage());
-
-        profileImageView.setOnClickListener(v -> {
-            if (currentBase64Image != null) {
-                viewImageFullScreen();
-            }
-        });
-    }
-
-    private void handleImageSelection() {
-        if (!checkPermissions()) {
-            requestPermissions(REQUIRED_PERMISSIONS, REQUEST_PERMISSIONS);
-            return;
-        }
-
-        showImageSourceDialog();
-    }
-
-    private void showImageSourceDialog() {
-        CharSequence[] options = {"Take Photo", "Choose from Gallery", "Cancel"};
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select Profile Picture");
-        builder.setItems(options, (dialog, which) -> {
-            if (options[which].equals("Take Photo")) {
-                dispatchTakePictureIntent();
-            } else if (options[which].equals("Choose from Gallery")) {
-                openImagePicker();
-            }
-        });
-        builder.show();
-    }
-
-    private void dispatchTakePictureIntent() {
-        try {
-            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                File photoFile = createImageFile();
-                if (photoFile != null) {
-                    currentImageUri = Uri.fromFile(photoFile);
-                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, currentImageUri);
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                }
-            }
-        } catch (IOException ex) {
-            Log.e(TAG, "Error creating image file: " + ex.getMessage());
-            showError("Error accessing camera");
-        }
-    }
-
-    private void openImagePicker() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        intent.setType("image/*");
-        startActivityForResult(intent, REQUEST_IMAGE_PICK);
-    }
-
-    private File createImageFile() throws IOException {
-        String timeStamp = String.valueOf(System.currentTimeMillis());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(null);
-        return File.createTempFile(imageFileName, ".jpg", storageDir);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_OK) {
-            switch (requestCode) {
-                case REQUEST_IMAGE_CAPTURE:
-                    handleCameraResult();
-                    break;
-                case REQUEST_IMAGE_PICK:
-                    handleGalleryResult(data);
-                    break;
-                case CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE:
-                    handleCropResult(data);
-                    break;
-            }
-        }
-    }
-
-    private void handleCameraResult() {
-        if (currentImageUri != null) {
-            startImageCropper(currentImageUri);
-        }
-    }
-
-    private void handleGalleryResult(Intent data) {
-        if (data != null && data.getData() != null) {
-            startImageCropper(data.getData());
-        }
-    }
-
-    private void startImageCropper(Uri imageUri) {
-        CropImage.activity(imageUri)
-                .setGuidelines(CropImageView.Guidelines.ON)
-                .setCropShape(CropImageView.CropShape.OVAL)
-                .setAspectRatio(1, 1)
-                .setRequestedSize(500, 500)
-                .setFixAspectRatio(true)
-                .setAllowRotation(true)
-                .setAllowFlipping(true)
-                .setAllowCounterRotation(true)
-                .setAutoZoomEnabled(true)
-                .setMultiTouchEnabled(true)
-                .setInitialCropWindowPaddingRatio(0.1f)
-                .setBorderLineThickness(3f)
-                .setBorderCornerThickness(5f)
-                .setBorderLineColor(ContextCompat.getColor(this, R.color.colorPrimary))
-                .setBorderCornerColor(ContextCompat.getColor(this, R.color.colorPrimary))
-                .start(this);
-    }
-
-    private void handleCropResult(Intent data) {
-        CropImage.ActivityResult result = CropImage.getActivityResult(data);
-        if (result != null && result.getUriContent() != null) {
-            processCroppedImage(result.getUriContent());
-        }
-    }
-
-    private void processCroppedImage(Uri imageUri) {
-        try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
-            bitmap = handleImageRotation(bitmap, imageUri);
-
-            // Compress and convert to Base64
-            currentBase64Image = convertBitmapToBase64(bitmap);
-
-            // Display the image
-            Glide.with(this)
-                    .load(bitmap)
-                    .apply(new RequestOptions().circleCrop())
-                    .into(profileImageView);
-
-            imageModified = true;
-            btnSave.setEnabled(true);
-
-        } catch (IOException e) {
-            Log.e(TAG, "Error processing image: " + e.getMessage());
-            showError("Error processing image");
-        }
-    }
-
-    private Bitmap handleImageRotation(Bitmap bitmap, Uri imageUri) {
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(imageUri);
-            if (inputStream != null) {
-                ExifInterface exif = new ExifInterface(inputStream);
-                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
-                Matrix matrix = new Matrix();
-                switch (orientation) {
-                    case ExifInterface.ORIENTATION_ROTATE_90:
-                        matrix.postRotate(90);
-                        break;
-                    case ExifInterface.ORIENTATION_ROTATE_180:
-                        matrix.postRotate(180);
-                        break;
-                    case ExifInterface.ORIENTATION_ROTATE_270:
-                        matrix.postRotate(270);
-                        break;
-                }
-
-                return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-            }
-        } catch (Exception e) {
-            Log.w(TAG, "Could not correct image orientation: " + e.getMessage());
-        }
-        return bitmap;
-    }
-
-    private String convertBitmapToBase64(Bitmap bitmap) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
-            byte[] imageBytes = baos.toByteArray();
-            return Base64.encodeToString(imageBytes, Base64.DEFAULT);
-        } catch (Exception e) {
-            Log.e(TAG, "Error converting image to Base64: " + e.getMessage());
-            return null;
-        }
-    }
-
-    private void saveProfileImage() {
-        if (currentUser == null || currentBase64Image == null) {
-            showError("No image to save");
-            return;
-        }
-
-        showLoading("Saving profile picture...");
-
-        // Upload to Firebase Storage first
-        uploadImageToStorage();
-    }
-
-    private void uploadImageToStorage() {
-        try {
-            byte[] imageBytes = Base64.decode(currentBase64Image, Base64.DEFAULT);
-            String fileName = "profile_" + currentUser.getUid() + "_" + System.currentTimeMillis() + ".jpg";
-            StorageReference imageRef = storageRef.child("profile_images/" + fileName);
-
-            UploadTask uploadTask = imageRef.putBytes(imageBytes);
-            uploadTask.addOnSuccessListener(taskSnapshot -> {
-                imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                    saveImageDataToFirestore(uri.toString());
-                }).addOnFailureListener(e -> {
-                    hideLoading();
-                    showError("Failed to get download URL: " + e.getMessage());
-                });
-            }).addOnFailureListener(e -> {
-                hideLoading();
-                showError("Upload failed: " + e.getMessage());
-            });
-
-        } catch (Exception e) {
-            hideLoading();
-            Log.e(TAG, "Error uploading image: " + e.getMessage());
-            showError("Error uploading image");
-        }
-    }
-
-    private void saveImageDataToFirestore(String imageUrl) {
-        Map<String, Object> profileData = new HashMap<>();
-        profileData.put("userId", currentUser.getUid());
-        profileData.put("imageUrl", imageUrl);
-        profileData.put("base64Image", currentBase64Image);
-        profileData.put("timestamp", System.currentTimeMillis());
-        profileData.put("email", currentUser.getEmail());
-
-        db.collection("profileImages")
-                .document(currentUser.getUid())
-                .set(profileData)
-                .addOnSuccessListener(aVoid -> {
-                    hideLoading();
-                    showSuccess("Profile picture saved successfully!");
-                    imageModified = false;
-                    btnSave.setEnabled(false);
-                })
-                .addOnFailureListener(e -> {
-                    hideLoading();
-                    showError("Failed to save profile: " + e.getMessage());
-                });
-    }
-
-    private void loadUserProfile() {
-        if (currentUser == null) return;
-
-        db.collection("profileImages")
-                .document(currentUser.getUid())
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists() && documentSnapshot.contains("imageUrl")) {
-                        String imageUrl = documentSnapshot.getString("imageUrl");
-                        loadProfileImage(imageUrl);
+    private void setupPickImageLauncher() {
+        pickImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                new ActivityResultCallback<Uri>() {
+                    @Override
+                    public void onActivityResult(Uri uri) {
+                        if (uri == null) return;
+                        handleImagePicked(uri);
                     }
+                }
+        );
+    }
+
+    private void setupListeners() {
+        btnChangePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Use system picker to avoid storage permissions
+                pickImageLauncher.launch("image/*");
+            }
+        });
+
+        profileImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (selectedImageBase64 == null || selectedImageBase64.isEmpty()) {
+                    Toast.makeText(ProfileActivity.this, "No image selected yet", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Intent intent = new Intent(ProfileActivity.this, FullScreenImageActivity.class);
+                intent.putExtra(FullScreenImageActivity.EXTRA_IMAGE_BASE64, selectedImageBase64);
+                startActivity(intent);
+            }
+        });
+
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveImageToFirestore();
+            }
+        });
+    }
+    private void handleImagePicked(Uri uri) {
+        setBusy(true, "Processing image...");
+        selectedImageUri = uri;
+
+        ioExecutor.execute(() -> {
+            try {
+                Bitmap bitmap = decodeBitmapDownsampled(uri, 1080, 1080);
+                if (bitmap == null) throw new IllegalStateException("Unable to decode image");
+
+                // Detect and crop face
+                Bitmap faceBitmap = detectAndCropFaceSync(bitmap);
+                if (faceBitmap == null) {
+                    mainHandler.post(() ->
+                            Toast.makeText(this, "No face detected — using full image", Toast.LENGTH_SHORT).show());
+                    faceBitmap = bitmap;
+                }
+
+                // Scale down before encoding
+                Bitmap compressed = maybeResize(faceBitmap, 1080);
+                String base64 = encodeBitmapToBase64(compressed, 85);
+
+                // Update UI
+                mainHandler.post(() -> {
+                    selectedImageBase64 = base64;
+                    cacheProfileImage(base64); // save to cache
+                    profileImageView.setImageBitmap(compressed);
+                    updateUiState(true);
+                    setBusy(false, null);
+                });
+
+            } catch (Exception e) {
+                Log.e(TAG, "Image processing failed", e);
+                mainHandler.post(() -> {
+                    setBusy(false, null);
+                    showError("Failed to process image. Try again.");
+                });
+            }
+        });
+    }
+
+    private Bitmap detectAndCropFaceSync(Bitmap original) {
+        try {
+            FaceDetectorOptions options = new FaceDetectorOptions.Builder()
+                    .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+                    .build();
+
+            FaceDetector detector = FaceDetection.getClient(options);
+            InputImage image = InputImage.fromBitmap(original, 0);
+
+            // Blocking wait since we're on ioExecutor
+            java.util.List<Face> faces = Tasks.await(detector.process(image));
+            detector.close();
+
+            if (!faces.isEmpty()) {
+                Face face = faces.get(0); // First face found
+                android.graphics.Rect box = face.getBoundingBox();
+
+                // Clamp bounds
+                int left = Math.max(0, box.left);
+                int top = Math.max(0, box.top);
+                int right = Math.min(original.getWidth(), box.right);
+                int bottom = Math.min(original.getHeight(), box.bottom);
+
+                return Bitmap.createBitmap(original, left, top, right - left, bottom - top);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Face detection failed: " + e.getMessage());
+        }
+        return null;
+    }
+    private void saveImageToFirestore() {
+        if (selectedImageBase64 == null || selectedImageBase64.isEmpty()) {
+            showError("Please choose an image first.");
+            return;
+        }
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            showError("Not signed in.");
+            return;
+        }
+
+        setBusy(true, "Saving image...");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("userId", user.getUid());
+        data.put("imageBase64", selectedImageBase64);
+        data.put("updatedAt", Timestamp.now());
+
+        FirebaseFirestore.getInstance()
+                .collection("profileimages")
+                .document(user.getUid()) // use userId as document id for idempotency
+                .set(data, SetOptions.merge())
+                .addOnSuccessListener(unused -> {
+                    setBusy(false, null);
+                    Toast.makeText(this, "Profile image saved", Toast.LENGTH_SHORT).show();
+
+                    // Navigate back to AccountFragment (parent handles this result)
+                    Intent result = new Intent();
+                    result.putExtra("navigateTo", "AccountFragment");
+                    setResult(Activity.RESULT_OK, result);
+                    finish();
                 })
                 .addOnFailureListener(e -> {
-                    Log.w(TAG, "Error loading profile image: " + e.getMessage());
+                    Log.e(TAG, "Firestore save failed", e);
+                    setBusy(false, null);
+                    showError("Failed to save. Check your connection and try again.");
                 });
     }
 
-    private void loadProfileImage(String imageUrl) {
-        Glide.with(this)
-                .load(imageUrl)
-                .apply(new RequestOptions()
-                        .circleCrop()
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .placeholder(R.drawable.ic_profile_placeholder)
-                        .error(R.drawable.ic_profile_placeholder))
-                .into(profileImageView);
+    // --- Helpers ---
+
+
+    private void cacheProfileImage(String base64) {
+        getSharedPreferences("profile_cache", MODE_PRIVATE)
+                .edit()
+                .putString("cached_profile_image", base64)
+                .apply();
     }
 
-    private void viewImageFullScreen() {
-        if (currentBase64Image != null) {
-            Intent intent = new Intent(this, FullScreenImageActivity.class);
-            intent.putExtra("image_base64", currentBase64Image);
-            startActivity(intent);
+
+    private void setBusy(boolean busy, @Nullable String message) {
+        progressBar.setVisibility(busy ? View.VISIBLE : View.GONE);
+        tvStatus.setText(message != null ? message : "");
+        tvStatus.setVisibility(busy && message != null ? View.VISIBLE : View.GONE);
+        btnSave.setEnabled(!busy && selectedImageBase64 != null && !selectedImageBase64.isEmpty());
+        btnChangePhoto.setEnabled(!busy);
+        mainContent.setEnabled(!busy);
+    }
+
+    private void updateUiState(boolean hasImage) {
+        btnSave.setEnabled(hasImage);
+    }
+
+    private void showError(String msg) {
+        tvStatus.setText(msg);
+        tvStatus.setVisibility(View.VISIBLE);
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    }
+
+    private Bitmap decodeBitmapDownsampled(Uri uri, int reqWidth, int reqHeight) throws Exception {
+        ContentResolver resolver = getContentResolver();
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        BitmapFactory.Options bounds = new BitmapFactory.Options();
+        bounds.inJustDecodeBounds = true;
+        try (InputStream is = resolver.openInputStream(uri)) {
+            BitmapFactory.decodeStream(is, null, bounds);
+        }
+
+        // Calculate inSampleSize
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inSampleSize = calculateInSampleSize(bounds, reqWidth, reqHeight);
+        opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+        try (InputStream is2 = resolver.openInputStream(uri)) {
+            return BitmapFactory.decodeStream(is2, null, opts);
         }
     }
 
-    private boolean checkPermissions() {
-        for (String permission : REQUIRED_PERMISSIONS) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                return false;
+    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        int height = options.outHeight;
+        int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
             }
         }
-        return true;
+        return Math.max(1, inSampleSize);
+    }
+
+    private Bitmap maybeResize(Bitmap src, int maxDim) {
+        int w = src.getWidth();
+        int h = src.getHeight();
+        int max = Math.max(w, h);
+        if (max <= maxDim) return src;
+
+        float scale = (float) maxDim / (float) max;
+        int newW = Math.round(w * scale);
+        int newH = Math.round(h * scale);
+        return Bitmap.createScaledBitmap(src, newW, newH, true);
+    }
+
+    private String encodeBitmapToBase64(Bitmap bitmap, int quality) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+        byte[] bytes = baos.toByteArray();
+        return Base64.encodeToString(bytes, Base64.NO_WRAP);
+    }
+
+    private Bitmap decodeBase64ToBitmap(String base64) {
+        byte[] decoded = Base64.decode(base64, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_PERMISSIONS) {
-            boolean allGranted = true;
-            for (int result : grantResults) {
-                if (result != PackageManager.PERMISSION_GRANTED) {
-                    allGranted = false;
-                    break;
-                }
-            }
-            if (allGranted) {
-                handleImageSelection();
-            } else {
-                showError("Permissions required to access photos");
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (selectedImageBase64 != null) outState.putString(KEY_STATE_BASE64, selectedImageBase64);
+        if (selectedImageUri != null) outState.putString(KEY_STATE_IMAGE_URI, selectedImageUri.toString());
+    }
+
+    private void restoreState(@Nullable Bundle savedInstanceState) {
+        if (savedInstanceState == null) return;
+        selectedImageBase64 = savedInstanceState.getString(KEY_STATE_BASE64);
+        String uriStr = savedInstanceState.getString(KEY_STATE_IMAGE_URI);
+        if (uriStr != null) selectedImageUri = Uri.parse(uriStr);
+
+        if (selectedImageBase64 != null) {
+            Bitmap bmp = decodeBase64ToBitmap(selectedImageBase64);
+            if (bmp != null) {
+                profileImageView.setImageBitmap(bmp);
+                updateUiState(true);
             }
         }
     }
 
-    private void showLoading(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
-    private void hideLoading() {
-        // Hide loading if you have a progress dialog
-    }
-
-    private void showError(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
-
-    private void showSuccess(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ioExecutor.shutdownNow();
     }
 }

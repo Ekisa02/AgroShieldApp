@@ -65,7 +65,9 @@
                                 android:src="@drawable/ic_profile_placeholder"
                                 app:shapeAppearanceOverlay="@style/CircleImageView"
                                 android:elevation="8dp"
-                                android:background="@drawable/profile_border_gradient"/>
+                                android:background="@drawable/profile_border_gradient"
+                                android:scaleType="centerCrop"
+                                />
 
                             <!-- Edit Pencil with glow -->
                             <ImageView

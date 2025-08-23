@@ -2,6 +2,9 @@ package com.Joseph.agroshieldapp;
 
 
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.imageview.ShapeableImageView;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -18,6 +21,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -25,6 +29,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,6 +77,7 @@ public class WeatherFragment extends Fragment {
 
 
 // CROP INFOR
+private ShapeableImageView profileImage;
 
     private RecyclerView cropsRecyclerView;
     private ProgressBar loadingIndicator;
@@ -130,8 +136,63 @@ public class WeatherFragment extends Fragment {
 
         fab.setOnClickListener(v -> showImageSourceDialog());
 
+
+
+        //profile image
+        profileImage = view.findViewById(R.id.profileImage);
+
+        fetchAndDisplayProfileImage();
+
         return view;
     }
+
+    //fetching profile image
+    private void fetchAndDisplayProfileImage() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            Toast.makeText(getContext(), "Not signed in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        DocumentReference docRef = FirebaseFirestore.getInstance()
+                .collection("profileimages")
+                .document(user.getUid());
+
+        docRef.get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String base64 = documentSnapshot.getString("imageBase64");
+                        if (base64 != null && !base64.isEmpty()) {
+                            Bitmap bmp = decodeBase64ToBitmap(base64);
+                            if (bmp != null) {
+                                profileImage.setImageBitmap(bmp);
+                            } else {
+                                profileImage.setImageResource(R.drawable.ic_profile_placeholder);
+                            }
+                        } else {
+                            profileImage.setImageResource(R.drawable.ic_profile_placeholder);
+                        }
+                    } else {
+                        profileImage.setImageResource(R.drawable.ic_profile_placeholder);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Failed to load image", Toast.LENGTH_SHORT).show();
+                    profileImage.setImageResource(R.drawable.ic_profile_placeholder);
+                });
+    }
+    //profile helper reference
+    private String getCachedProfileImage() {
+        return requireContext()
+                .getSharedPreferences("profile_cache", Context.MODE_PRIVATE)
+                .getString("cached_profile_image", null);
+    }
+
+
+
+
+
+
 
     //NETWORK STATUS CHECKING
 
@@ -464,4 +525,28 @@ public class WeatherFragment extends Fragment {
                     adapter.notifyDataSetChanged();
                 });
     }
+
+    private Bitmap decodeBase64ToBitmap(String base64) {
+        byte[] decoded = Base64.decode(base64, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // 1. Try cache first
+        String cachedBase64 = getCachedProfileImage();
+        if (cachedBase64 != null && !cachedBase64.isEmpty()) {
+            Bitmap bmp = decodeBase64ToBitmap(cachedBase64);
+            if (bmp != null) {
+                profileImage.setImageBitmap(bmp);
+            }
+        }
+
+        // 2. Then fetch latest from Firestore to refresh if changed
+        fetchAndDisplayProfileImage();
+    }
+
 }

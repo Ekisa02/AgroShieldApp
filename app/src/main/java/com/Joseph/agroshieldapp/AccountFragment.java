@@ -4,8 +4,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -26,6 +29,7 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -34,6 +38,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -43,7 +49,8 @@ public class AccountFragment extends Fragment {
 
     // Profile Views
     private MaterialCardView profileCard, accountSettingsCard, appSettingsCard;
-    private ImageView editProfileBtn, profileImage;
+    private ImageView editProfileBtn;
+    private ShapeableImageView profileImage;
     private Chip premiumChip;
     private TextView userName, followersCount, followingCount, memberSinceYear;
     private LinearLayout followersSection, followingSection, memberSinceSection;
@@ -107,6 +114,11 @@ public class AccountFragment extends Fragment {
             showErrorLayout(view);
         }
 
+        //profile image
+        profileImage = view.findViewById(R.id.profileImage);
+
+        fetchAndDisplayProfileImage();
+
         return view;
     }
 
@@ -124,7 +136,7 @@ public class AccountFragment extends Fragment {
 
             // Profile section
             editProfileBtn = view.findViewById(R.id.editProfileBtn);
-            profileImage = view.findViewById(R.id.profileImage);
+            //profileImage = view.findViewById(R.id.profileImage);
             userName = view.findViewById(R.id.userName);
             premiumChip = view.findViewById(R.id.premiumChip);
             followersCount = view.findViewById(R.id.followersCount);
@@ -152,6 +164,59 @@ public class AccountFragment extends Fragment {
         } catch (Exception e) {
             Log.e("AccountFragment", "Error initializing views: " + e.getMessage());
             throw e;
+        }
+    }
+
+
+    //fetching profile image
+    private void fetchAndDisplayProfileImage() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            Toast.makeText(getContext(), "Not signed in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        DocumentReference docRef = FirebaseFirestore.getInstance()
+                .collection("profileimages")
+                .document(user.getUid());
+
+        docRef.get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String base64 = documentSnapshot.getString("imageBase64");
+                        if (base64 != null && !base64.isEmpty()) {
+                            Bitmap bmp = decodeBase64ToBitmap(base64);
+                            if (bmp != null) {
+                                profileImage.setImageBitmap(bmp);
+                            } else {
+                                profileImage.setImageResource(R.drawable.ic_profile_placeholder);
+                            }
+                        } else {
+                            profileImage.setImageResource(R.drawable.ic_profile_placeholder);
+                        }
+                    } else {
+                        profileImage.setImageResource(R.drawable.ic_profile_placeholder);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Failed to load image", Toast.LENGTH_SHORT).show();
+                    profileImage.setImageResource(R.drawable.ic_profile_placeholder);
+                });
+    }
+    //profile helper reference
+    private String getCachedProfileImage() {
+        return requireContext()
+                .getSharedPreferences("profile_cache", Context.MODE_PRIVATE)
+                .getString("cached_profile_image", null);
+    }
+
+
+    private Bitmap decodeBase64ToBitmap(String base64) {
+        try {
+            byte[] decoded = Base64.decode(base64, Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+        } catch (Exception e) {
+            return null;
         }
     }
 
@@ -226,7 +291,8 @@ public class AccountFragment extends Fragment {
             if (editProfileBtn != null) {
                 editProfileBtn.setOnClickListener(v -> {
                     applyPressAnimation(v);
-                    Toast.makeText(getContext(), "Edit Profile Clicked", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(getActivity(), ProfileActivity.class));
+                    Toast.makeText(getContext(), "Navigating to profile page....", Toast.LENGTH_SHORT).show();
                 });
             }
 
@@ -772,6 +838,19 @@ public class AccountFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        // 1. Try cache first
+        String cachedBase64 = getCachedProfileImage();
+        if (cachedBase64 != null && !cachedBase64.isEmpty()) {
+            Bitmap bmp = decodeBase64ToBitmap(cachedBase64);
+            if (bmp != null) {
+                profileImage.setImageBitmap(bmp);
+            }
+        }
+
+        // 2. Then fetch latest from Firestore to refresh if changed
+        fetchAndDisplayProfileImage();
+
         try {
             // Refresh user data when fragment resumes
             loadUserData();
