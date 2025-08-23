@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorControlHighlight">
+
+    <!-- Ripple mask for nicer touch feedback -->
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <corners android:radius="24dp" />
+            <solid android:color="#FFFFFFFF" />
+        </shape>
+    </item>
+
+    <!-- Content with states: default, pressed, disabled -->
+    <item>
+        <selector>
+
+            <!-- Disabled -->
+            <item android:state_enabled="false">
+                <shape android:shape="rectangle">
+                    <corners android:radius="24dp" />
+                    <solid android:color="#334A4A4A" />
+                    <stroke
+                        android:width="1dp"
+                        android:color="#334A4A4A" />
+                </shape>
+            </item>
+
+            <!-- Pressed -->
+            <item android:state_pressed="true">
+                <shape android:shape="rectangle">
+                    <corners android:radius="24dp" />
+                    <gradient
+                        android:type="linear"
+                        android:angle="270"
+                        android:startColor="#2B57FF"
+                        android:endColor="#1437CC" />
+                    <stroke
+                        android:width="1dp"
+                        android:color="#80C5D0FF" />
+                </shape>
+            </item>
+
+            <!-- Default -->
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="24dp" />
+                    <gradient
+                        android:type="linear"
+                        android:angle="270"
+                        android:startColor="#5B8CFF"
+                        android:endColor="#2D5BFF" />
+                    <stroke
+                        android:width="1dp"
+                        android:color="#99D6DEFF" />
+                </shape>
+            </item>
+
+        </selector>
+    </item>
+</ripple>

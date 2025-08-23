@@ -52,7 +52,7 @@ public class AccountFragment extends Fragment {
     private ImageView editProfileBtn;
     private ShapeableImageView profileImage;
     private Chip premiumChip;
-    private TextView userName, followersCount, followingCount, memberSinceYear;
+    private TextView userName, followersCount, followingCount, memberSinceYear ,followers;
     private LinearLayout followersSection, followingSection, memberSinceSection;
 
     // Account Settings Views
@@ -119,6 +119,8 @@ public class AccountFragment extends Fragment {
 
         fetchAndDisplayProfileImage();
 
+        NavigateToFollwersPage();
+
         return view;
     }
 
@@ -139,6 +141,7 @@ public class AccountFragment extends Fragment {
             //profileImage = view.findViewById(R.id.profileImage);
             userName = view.findViewById(R.id.userName);
             premiumChip = view.findViewById(R.id.premiumChip);
+            followers = view.findViewById(R.id.followers);
             followersCount = view.findViewById(R.id.followersCount);
             followingCount = view.findViewById(R.id.followingCount);
             memberSinceYear = view.findViewById(R.id.memberSinceYear);
@@ -306,6 +309,7 @@ public class AccountFragment extends Fragment {
 
             // Stats sections
             setSectionClickListener(followersSection, "Show Followers");
+
             setSectionClickListener(followingSection, "Show Following");
             setSectionClickListener(memberSinceSection, "Member Since Details");
 
@@ -313,6 +317,7 @@ public class AccountFragment extends Fragment {
             Log.e("AccountFragment", "Error setting up header click listeners: " + e.getMessage());
         }
     }
+
     // checking membership status
     private void checkPremiumStatusAndHandleClick() {
         if (currentUser == null) return;
@@ -669,7 +674,7 @@ public class AccountFragment extends Fragment {
                     calendar.setTimeInMillis(memberSince);
                     memberSinceYear.setText(String.valueOf(calendar.get(Calendar.YEAR)));
                 } else {
-                    memberSinceYear.setText("2023"); // Default year
+                    memberSinceYear.setText("2025"); // Default year
                 }
             }
 
@@ -678,6 +683,10 @@ public class AccountFragment extends Fragment {
         }
     }
 
+    //folowers button:
+  private void  NavigateToFollwersPage(){
+      //followers.setOnClickListener(view -> startActivity(new Intent(getActivity(), FollowersActivity.class)));
+  }
     private void loadSampleData() {
         try {
             // Set sample data as fallback

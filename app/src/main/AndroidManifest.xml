@@ -33,10 +33,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AgroShieldApp">
         <activity
+            android:name=".FollowersActivity"
+            android:exported="false" />
+        <activity
             android:name=".CustomCropActivity"
             android:exported="false"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
         <activity
             android:name=".FullScreenImageActivity"
             android:exported="false" />

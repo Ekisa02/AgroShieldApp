@@ -13,6 +13,7 @@
     <string name="upload_uploading">Uploading data... %d%%</string>
     <string name="contact_seller">Contact Seller</string>
     <string name="category_prompt">Select a category</string>
+    <string name="username">\@johndoe\n</string>
 
     <string-array name="categories_array">
         <item>All</item>
