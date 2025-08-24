@@ -41,8 +41,11 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class AccountFragment extends Fragment {
@@ -70,6 +73,8 @@ public class AccountFragment extends Fragment {
     private FirebaseAuth mAuth;
     private DatabaseReference userRef;
     private FirebaseUser currentUser;
+    private FirebaseFirestore firestore;
+    private DatabaseReference followersRef, followingRef;
 
     // Theme
     private boolean isDarkMode = false;
@@ -82,6 +87,15 @@ public class AccountFragment extends Fragment {
             mAuth = FirebaseAuth.getInstance();
             userRef = FirebaseDatabase.getInstance().getReference("Users");
             currentUser = mAuth.getCurrentUser();
+            // Initialize Firestore for social counts
+            firestore = FirebaseFirestore.getInstance();
+
+            // Initialize Realtime Database references
+            if (currentUser != null) {
+                String uid = currentUser.getUid();
+                followersRef = FirebaseDatabase.getInstance().getReference("Followers").child(uid);
+                followingRef = FirebaseDatabase.getInstance().getReference("Following").child(uid);
+            }
         } catch (Exception e) {
             Log.e("AccountFragment", "Firebase initialization error: " + e.getMessage());
         }
@@ -657,34 +671,220 @@ public class AccountFragment extends Fragment {
 
     private void loadAdditionalUserData(DataSnapshot snapshot) {
         try {
-            // Load followers count
-            Long followers = snapshot.child("followers").getValue(Long.class);
-            if (followersCount != null) {
-                followersCount.setText(formatCount(followers != null ? followers : 0));
+            // Load user name if not already loaded
+            String name = snapshot.child("name").getValue(String.class);
+            if (userName != null && name != null) {
+                userName.setText(name);
             }
 
-            // Load following count
-            Long following = snapshot.child("following").getValue(Long.class);
-            if (followingCount != null) {
-                followingCount.setText(formatCount(following != null ? following : 0));
-            }
+            // Load REAL followers count from Firestore
+            loadRealFollowersCount();
 
-            // Load member since date
-            Long memberSince = snapshot.child("memberSince").getValue(Long.class);
-            if (memberSinceYear != null) {
-                if (memberSince != null) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTimeInMillis(memberSince);
-                    memberSinceYear.setText(String.valueOf(calendar.get(Calendar.YEAR)));
-                } else {
-                    memberSinceYear.setText("2025"); // Default year
-                }
-            }
+            // Load REAL following count from Firestore
+            loadRealFollowingCount();
+
+            // Load REAL member since date from multiple possible sources
+            loadRealMemberSinceDate(snapshot);
 
         } catch (Exception e) {
             Log.e("AccountFragment", "Error loading additional user data: " + e.getMessage());
+            // Fallback to sample data if real data fails
+            loadSampleData();
         }
     }
+    private void loadRealFollowersCount() {
+        if (currentUser == null) return;
+
+        String uid = currentUser.getUid();
+
+        // Try Firestore first (where we store followers)
+        firestore.collection("followers").document(uid)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        List<String> followerIds = (List<String>) documentSnapshot.get("followerIds");
+                        int followers = followerIds != null ? followerIds.size() : 0;
+                        if (followersCount != null) {
+                            followersCount.setText(formatCount(followers));
+                        }
+                    } else {
+                        // Fallback to Realtime Database
+                        loadFollowersFromRealtimeDB();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("AccountFragment", "Error loading followers from Firestore: " + e.getMessage());
+                    loadFollowersFromRealtimeDB();
+                });
+    }
+
+    private void loadFollowersFromRealtimeDB() {
+        if (followersRef != null) {
+            followersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    long followers = snapshot.getChildrenCount();
+                    if (followersCount != null) {
+                        followersCount.setText(formatCount(followers));
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e("AccountFragment", "Error loading followers from Realtime DB: " + error.getMessage());
+                    if (followersCount != null) {
+                        followersCount.setText("0");
+                    }
+                }
+            });
+        }
+    }
+
+    private void loadRealFollowingCount() {
+        if (currentUser == null) return;
+
+        String uid = currentUser.getUid();
+
+        // Try Firestore first (where we store following)
+        firestore.collection("following").document(uid)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        List<String> followingIds = (List<String>) documentSnapshot.get("followingIds");
+                        int following = followingIds != null ? followingIds.size() : 0;
+                        if (followingCount != null) {
+                            followingCount.setText(formatCount(following));
+                        }
+                    } else {
+                        // Fallback to Realtime Database
+                        loadFollowingFromRealtimeDB();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("AccountFragment", "Error loading following from Firestore: " + e.getMessage());
+                    loadFollowingFromRealtimeDB();
+                });
+    }
+
+    private void loadFollowingFromRealtimeDB() {
+        if (followingRef != null) {
+            followingRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    long following = snapshot.getChildrenCount();
+                    if (followingCount != null) {
+                        followingCount.setText(formatCount(following));
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e("AccountFragment", "Error loading following from Realtime DB: " + error.getMessage());
+                    if (followingCount != null) {
+                        followingCount.setText("0");
+                    }
+                }
+            });
+        }
+    }
+
+    private void loadRealMemberSinceDate(DataSnapshot snapshot) {
+        if (memberSinceYear == null) return;
+
+        // Try multiple possible field names for creation date
+        Long createdAt = null;
+
+        // Check Realtime Database fields
+        if (snapshot.child("createdAt").exists()) {
+            createdAt = snapshot.child("createdAt").getValue(Long.class);
+        } else if (snapshot.child("timestamp").exists()) {
+            createdAt = snapshot.child("timestamp").getValue(Long.class);
+        } else if (snapshot.child("joinDate").exists()) {
+            createdAt = snapshot.child("joinDate").getValue(Long.class);
+        } else if (snapshot.child("memberSince").exists()) {
+            createdAt = snapshot.child("memberSince").getValue(Long.class);
+        }
+
+        if (createdAt != null) {
+            // Format the date properly
+            String formattedDate = formatMemberSinceDate(createdAt);
+            memberSinceYear.setText(formattedDate);
+        } else {
+            // If not found in Realtime DB, try Firestore
+            loadMemberSinceFromFirestore();
+        }
+    }
+
+    private void loadMemberSinceFromFirestore() {
+        if (currentUser == null || memberSinceYear == null) return;
+
+        String uid = currentUser.getUid();
+
+        firestore.collection("Users").document(uid)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // Check multiple possible field names in Firestore
+                        Long createdAt = documentSnapshot.getLong("createdAt");
+                        if (createdAt == null) createdAt = documentSnapshot.getLong("timestamp");
+                        if (createdAt == null) createdAt = documentSnapshot.getLong("joinDate");
+                        if (createdAt == null) createdAt = documentSnapshot.getLong("memberSince");
+                        if (createdAt == null) createdAt = documentSnapshot.getLong("creationTime");
+
+                        if (createdAt != null) {
+                            String formattedDate = formatMemberSinceDate(createdAt);
+                            memberSinceYear.setText(formattedDate);
+                        } else {
+                            // Use account creation time as fallback
+                            setAccountCreationFallback();
+                        }
+                    } else {
+                        setAccountCreationFallback();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("AccountFragment", "Error loading member since from Firestore: " + e.getMessage());
+                    setAccountCreationFallback();
+                });
+    }
+
+    private String formatMemberSinceDate(long timestamp) {
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(timestamp);
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
+            return "Member since " + dateFormat.format(calendar.getTime());
+        } catch (Exception e) {
+            Log.e("AccountFragment", "Error formatting date: " + e.getMessage());
+            return "Member since 2025";
+        }
+    }
+
+    private void setAccountCreationFallback() {
+        if (memberSinceYear != null) {
+            if (currentUser != null) {
+                // Use Firebase Auth account creation time if available
+                long creationTime = currentUser.getMetadata().getCreationTimestamp();
+                if (creationTime > 0) {
+                    String formattedDate = formatMemberSinceDate(creationTime);
+                    memberSinceYear.setText(formattedDate);
+                } else {
+                    // Final fallback - current year
+                    Calendar calendar = Calendar.getInstance();
+                    int currentYear = calendar.get(Calendar.YEAR);
+                    memberSinceYear.setText("Member since " + currentYear);
+                }
+            } else {
+                // Final fallback - current year
+                Calendar calendar = Calendar.getInstance();
+                int currentYear = calendar.get(Calendar.YEAR);
+                memberSinceYear.setText("Member since " + currentYear);
+            }
+        }
+    }
+
+
 
     //folowers  && following button:
   private void  NavigateToFollwersPage(){
@@ -695,11 +895,27 @@ public class AccountFragment extends Fragment {
     private void loadSampleData() {
         try {
             // Set sample data as fallback
-            if (userName != null) userName.setText("User");
-            if (followersCount != null) followersCount.setText("0");
-            if (followingCount != null) followingCount.setText("0");
-            if (memberSinceYear != null) memberSinceYear.setText("2025");
-            updatePremiumChip(false); // Assume basic subscription
+            if (userName != null) {
+                if (currentUser != null && currentUser.getDisplayName() != null) {
+                    userName.setText(currentUser.getDisplayName());
+                } else {
+                    userName.setText("User");
+                }
+            }
+
+            // Show loading state instead of zeros
+            if (followersCount != null) followersCount.setText("...");
+            if (followingCount != null) followingCount.setText("...");
+
+            // Set realistic member since year
+            if (memberSinceYear != null) {
+                Calendar calendar = Calendar.getInstance();
+                int currentYear = calendar.get(Calendar.YEAR);
+                memberSinceYear.setText("Member since " + currentYear);
+            }
+
+            updatePremiumChip(false); // Assume basic subscription initially
+
         } catch (Exception e) {
             Log.e("AccountFragment", "Error loading sample data: " + e.getMessage());
         }
@@ -720,19 +936,21 @@ public class AccountFragment extends Fragment {
 
     private String formatCount(long count) {
         try {
-            if (count < 1000) {
+            if (count < 0) {
+                return "0"; // Handle negative numbers
+            } else if (count < 1000) {
                 return String.valueOf(count);
             } else if (count < 1000000) {
-                return String.format("%.1fK", count / 1000.0);
+                // Format with locale-aware formatting
+                return String.format(Locale.getDefault(), "%.1fK", count / 1000.0);
             } else {
-                return String.format("%.1fM", count / 1000000.0);
+                return String.format(Locale.getDefault(), "%.1fM", count / 1000000.0);
             }
         } catch (Exception e) {
             Log.e("AccountFragment", "Error formatting count: " + e.getMessage());
             return "0";
         }
     }
-
     private void createUserDocument() {
         if (currentUser == null) return;
 
