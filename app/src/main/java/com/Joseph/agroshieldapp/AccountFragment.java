@@ -52,7 +52,7 @@ public class AccountFragment extends Fragment {
     private ImageView editProfileBtn;
     private ShapeableImageView profileImage;
     private Chip premiumChip;
-    private TextView userName, followersCount, followingCount, memberSinceYear ,followers;
+    private TextView userName, followersCount, followingCount, memberSinceYear ,followers,following;
     private LinearLayout followersSection, followingSection, memberSinceSection;
 
     // Account Settings Views
@@ -142,6 +142,7 @@ public class AccountFragment extends Fragment {
             userName = view.findViewById(R.id.userName);
             premiumChip = view.findViewById(R.id.premiumChip);
             followers = view.findViewById(R.id.followers);
+            following = view.findViewById(R.id.Following);
             followersCount = view.findViewById(R.id.followersCount);
             followingCount = view.findViewById(R.id.followingCount);
             memberSinceYear = view.findViewById(R.id.memberSinceYear);
@@ -607,6 +608,8 @@ public class AccountFragment extends Fragment {
         }
     }
 
+
+  // user name
     private void loadUserData() {
         if (currentUser == null) {
             Toast.makeText(getContext(), "Please log in to view profile", Toast.LENGTH_SHORT).show();
@@ -683,9 +686,11 @@ public class AccountFragment extends Fragment {
         }
     }
 
-    //folowers button:
+    //folowers  && following button:
   private void  NavigateToFollwersPage(){
       //followers.setOnClickListener(view -> startActivity(new Intent(getActivity(), FollowersActivity.class)));
+      following.setOnClickListener(view -> startActivity(new Intent(getActivity(), FollowingActivity.class)));
+
   }
     private void loadSampleData() {
         try {

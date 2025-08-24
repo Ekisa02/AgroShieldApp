@@ -544,7 +544,6 @@ private ShapeableImageView profileImage;
                 profileImage.setImageBitmap(bmp);
             }
         }
-
         // 2. Then fetch latest from Firestore to refresh if changed
         fetchAndDisplayProfileImage();
     }

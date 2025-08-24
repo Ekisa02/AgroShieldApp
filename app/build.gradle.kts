@@ -52,6 +52,9 @@ dependencies {
     // Use only one image loading library (Picasso OR Glide), but both are kept here if you use both in your code.
     implementation("com.squareup.picasso:picasso:2.71828")
     implementation("com.github.bumptech.glide:glide:4.15.1")
+    implementation(libs.firebase.messaging)
+    implementation(libs.room.common.jvm)
+    implementation(libs.room.runtime)
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
     implementation(libs.activity)
     implementation("com.google.android.gms:play-services-auth:21.0.0")
@@ -86,4 +89,5 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.1")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    annotationProcessor(libs.room.compiler)
 }
