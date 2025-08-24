@@ -4,6 +4,8 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Delete;
+import com.Joseph.agroshieldapp.Social.CachedUser;
 
 @Dao
 public interface UserDao {
@@ -15,4 +17,10 @@ public interface UserDao {
 
     @Query("DELETE FROM cached_users WHERE lastUpdated < :timestamp")
     void deleteOldEntries(long timestamp);
+
+    @Query("DELETE FROM cached_users WHERE uid = :userId")
+    void deleteUser(String userId);
+
+    @Query("DELETE FROM cached_users")
+    void clearAll();
 }

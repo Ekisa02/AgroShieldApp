@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.Joseph.agroshieldapp.FollowingActivity;
 import com.Joseph.agroshieldapp.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -53,42 +54,54 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         User user = userList.get(position);
         holder.username.setText(user.getUsername());
 
-        // Set profile image
         if (user.getProfileImage() != null) {
             holder.profileImage.setImageBitmap(user.getProfileImage());
         } else {
             holder.profileImage.setImageResource(R.drawable.ic_profile_placeholder);
         }
 
-        // Set follow button text and behavior
         holder.followButton.setText(user.getFollowStatus());
-        setupFollowButton(holder.followButton, user);
+        setupFollowButton(holder.followButton, user, position);
 
-        // Setup real-time listener for this user's follow status
         setupRealTimeListener(user.getUid(), holder.followButton, position);
     }
 
-    private void setupFollowButton(Button followButton, User user) {
+    private void setupFollowButton(Button followButton, User user, int position) {
         followButton.setOnClickListener(v -> {
             String currentStatus = user.getFollowStatus();
 
-            if ("follow".equals(currentStatus)) {
+            if ("follow".equals(currentStatus) || "follow_back".equals(currentStatus)) {
                 followUser(user.getUid());
                 user.setFollowStatus("following");
+                followButton.setText("following");
+
+                // Notify activity to remove this user from suggestions
+                if (context instanceof Activity) {
+                    ((Activity) context).runOnUiThread(() -> {
+                        if (context instanceof FollowingActivity) {
+                            ((FollowingActivity) context).removeUserFromSuggestions(user.getUid());
+                        }
+                    });
+                }
+
             } else if ("following".equals(currentStatus)) {
                 unfollowUser(user.getUid());
                 user.setFollowStatus("follow");
-            } else if ("follow_back".equals(currentStatus)) {
-                followUser(user.getUid());
-                user.setFollowStatus("following");
-            }
+                followButton.setText("follow");
 
-            followButton.setText(user.getFollowStatus());
+                // Refresh suggestions
+                if (context instanceof Activity) {
+                    ((Activity) context).runOnUiThread(() -> {
+                        if (context instanceof FollowingActivity) {
+                            ((FollowingActivity) context).refreshSuggestions();
+                        }
+                    });
+                }
+            }
         });
     }
 
     private void followUser(String targetUserId) {
-        // Add to current user's following
         db.collection("following").document(currentUserId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -98,20 +111,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                         if (followingIds != null && !followingIds.contains(targetUserId)) {
                             followingIds.add(targetUserId);
                             followingData.put("followingIds", followingIds);
-                        } else {
-                            return; // Already following
                         }
                     } else {
                         followingData.put("followingIds", java.util.Arrays.asList(targetUserId));
                     }
-                    db.collection("following").document(currentUserId).set(followingData)
-                            .addOnFailureListener(e ->
-                                    Log.e(TAG, "Error updating following: " + e.getMessage()));
-                })
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Error checking following: " + e.getMessage()));
+                    db.collection("following").document(currentUserId).set(followingData);
+                });
 
-        // Add to target user's followers
         db.collection("followers").document(targetUserId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -121,22 +127,15 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                         if (followerIds != null && !followerIds.contains(currentUserId)) {
                             followerIds.add(currentUserId);
                             followerData.put("followerIds", followerIds);
-                        } else {
-                            return; // Already a follower
                         }
                     } else {
                         followerData.put("followerIds", java.util.Arrays.asList(currentUserId));
                     }
-                    db.collection("followers").document(targetUserId).set(followerData)
-                            .addOnFailureListener(e ->
-                                    Log.e(TAG, "Error updating followers: " + e.getMessage()));
-                })
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Error checking followers: " + e.getMessage()));
+                    db.collection("followers").document(targetUserId).set(followerData);
+                });
     }
 
     private void unfollowUser(String targetUserId) {
-        // Remove from current user's following
         db.collection("following").document(currentUserId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -146,16 +145,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                             followingIds.remove(targetUserId);
                             Map<String, Object> followingData = new HashMap<>();
                             followingData.put("followingIds", followingIds);
-                            db.collection("following").document(currentUserId).set(followingData)
-                                    .addOnFailureListener(e ->
-                                            Log.e(TAG, "Error updating following: " + e.getMessage()));
+                            db.collection("following").document(currentUserId).set(followingData);
                         }
                     }
-                })
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Error checking following: " + e.getMessage()));
+                });
 
-        // Remove from target user's followers
         db.collection("followers").document(targetUserId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -165,24 +159,18 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                             followerIds.remove(currentUserId);
                             Map<String, Object> followerData = new HashMap<>();
                             followerData.put("followerIds", followerIds);
-                            db.collection("followers").document(targetUserId).set(followerData)
-                                    .addOnFailureListener(e ->
-                                            Log.e(TAG, "Error updating followers: " + e.getMessage()));
+                            db.collection("followers").document(targetUserId).set(followerData);
                         }
                     }
-                })
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Error checking followers: " + e.getMessage()));
+                });
     }
 
     private void setupRealTimeListener(String targetUserId, Button followButton, int position) {
-        // Remove existing listener if any
         if (listeners.containsKey(targetUserId)) {
             listeners.get(targetUserId).remove();
             listeners.remove(targetUserId);
         }
 
-        // Add new real-time listener
         ListenerRegistration listener = db.collection("following")
                 .document(currentUserId)
                 .addSnapshotListener((documentSnapshot, error) -> {
@@ -195,7 +183,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                         List<String> followingIds = (List<String>) documentSnapshot.get("followingIds");
                         boolean isFollowing = followingIds != null && followingIds.contains(targetUserId);
 
-                        // Update UI on main thread
                         if (context instanceof Activity) {
                             ((Activity) context).runOnUiThread(() -> {
                                 if (position < userList.size() && position >= 0) {
@@ -238,9 +225,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                             });
                         }
                     }
-                })
-                .addOnFailureListener(e ->
-                        Log.e(TAG, "Error checking follow back status: " + e.getMessage()));
+                });
     }
 
     @Override
@@ -259,7 +244,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
         super.onViewRecycled(holder);
-        // Clean up listeners when view is recycled
         int position = holder.getAdapterPosition();
         if (position != RecyclerView.NO_POSITION && position < userList.size()) {
             User user = userList.get(position);
@@ -271,7 +255,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     }
 
     public void cleanup() {
-        // Remove all listeners
         for (ListenerRegistration listener : listeners.values()) {
             if (listener != null) {
                 listener.remove();
@@ -279,7 +262,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         }
         listeners.clear();
 
-        // Clear data
         if (userList != null) {
             userList.clear();
         }

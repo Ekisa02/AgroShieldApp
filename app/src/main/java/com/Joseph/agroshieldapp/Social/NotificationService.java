@@ -6,9 +6,9 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -17,10 +17,6 @@ import androidx.core.content.ContextCompat;
 import com.Joseph.agroshieldapp.R;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.auth.FirebaseAuth;
-
-import java.util.HashMap;
 
 public class NotificationService extends FirebaseMessagingService {
     private static final String TAG = "NotificationService";
@@ -43,19 +39,24 @@ public class NotificationService extends FirebaseMessagingService {
             String senderName = remoteMessage.getData().get("senderName");
 
             if ("follow_back".equals(type) && senderName != null) {
-                showFollowBackNotification(senderName);
+                // Check if notifications are enabled before trying to show
+                if (areNotificationsEnabled() && checkNotificationPermission()) {
+                    showFollowBackNotification(senderName);
+                } else {
+                    Log.d(TAG, "Notifications disabled, not showing notification for: " + senderName);
+                    // You could store this to show later when permissions are granted
+                }
             } else if ("new_follower".equals(type) && senderName != null) {
-                showNewFollowerNotification(senderName);
+                if (areNotificationsEnabled() && checkNotificationPermission()) {
+                    showNewFollowerNotification(senderName);
+                } else {
+                    Log.d(TAG, "Notifications disabled, not showing notification for: " + senderName);
+                }
             }
         }
     }
 
     private void showFollowBackNotification(String senderName) {
-        if (!areNotificationsEnabled() || !checkNotificationPermission()) {
-            Log.w(TAG, "Notifications not enabled or permission not granted");
-            return;
-        }
-
         try {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_notification)
@@ -66,20 +67,18 @@ public class NotificationService extends FirebaseMessagingService {
                     .setCategory(NotificationCompat.CATEGORY_SOCIAL);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-            notificationManager.notify((int) (System.currentTimeMillis() % Integer.MAX_VALUE), builder.build());
 
-            Log.d(TAG, "Follow back notification shown for: " + senderName);
+            // Double-check permission before showing
+            if (checkNotificationPermission()) {
+                notificationManager.notify((int) (System.currentTimeMillis() % Integer.MAX_VALUE), builder.build());
+                Log.d(TAG, "Follow back notification shown for: " + senderName);
+            }
         } catch (Exception e) {
             Log.e(TAG, "Error showing follow back notification: " + e.getMessage());
         }
     }
 
     private void showNewFollowerNotification(String senderName) {
-        if (!areNotificationsEnabled() || !checkNotificationPermission()) {
-            Log.w(TAG, "Notifications not enabled or permission not granted");
-            return;
-        }
-
         try {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_notification)
@@ -90,14 +89,19 @@ public class NotificationService extends FirebaseMessagingService {
                     .setCategory(NotificationCompat.CATEGORY_SOCIAL);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-            notificationManager.notify((int) (System.currentTimeMillis() % Integer.MAX_VALUE), builder.build());
 
-            Log.d(TAG, "New follower notification shown for: " + senderName);
+            if (checkNotificationPermission()) {
+                notificationManager.notify((int) (System.currentTimeMillis() % Integer.MAX_VALUE), builder.build());
+                Log.d(TAG, "New follower notification shown for: " + senderName);
+            }
         } catch (Exception e) {
             Log.e(TAG, "Error showing new follower notification: " + e.getMessage());
         }
     }
 
+    /**
+     * Check if notification permission is granted (Android 13+)
+     */
     private boolean checkNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -107,6 +111,9 @@ public class NotificationService extends FirebaseMessagingService {
         return true;
     }
 
+    /**
+     * Check if notifications are enabled system-wide
+     */
     private boolean areNotificationsEnabled() {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         return notificationManager.areNotificationsEnabled();
@@ -136,27 +143,6 @@ public class NotificationService extends FirebaseMessagingService {
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
         Log.d(TAG, "New FCM token: " + token);
-        saveTokenToFirestore(token);
-    }
-
-    private void saveTokenToFirestore(String token) {
-        String userId = FirebaseAuth.getInstance().getCurrentUser() != null ?
-                FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
-
-        if (userId != null) {
-            FirebaseFirestore.getInstance().collection("userTokens")
-                    .document(userId)
-                    .set(new HashMap<String, Object>() {{
-                        put("token", token);
-                        put("timestamp", System.currentTimeMillis());
-                        put("platform", "android");
-                    }})
-                    .addOnSuccessListener(aVoid ->
-                            Log.d(TAG, "FCM token saved to Firestore"))
-                    .addOnFailureListener(e ->
-                            Log.e(TAG, "Error saving FCM token: " + e.getMessage()));
-        } else {
-            Log.w(TAG, "User not authenticated, cannot save FCM token");
-        }
+        // Token refresh handling - you can save this to your server if needed
     }
 }
