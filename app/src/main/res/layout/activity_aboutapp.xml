@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Add Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="?attr/actionBarTheme"
+        app:title="About AgroShield" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:background="#FFFFFF">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Header Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/gradient_background">
+
+                <ImageView
+                    android:id="@+id/app_logo"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+
+                    android:src="@mipmap/ic_launcher"
+                    android:layout_gravity="start"
+                    android:contentDescription="AgroShield Logo" />
+
+                <TextView
+                    android:id="@+id/tv_app_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="AgroShield"
+                    android:textColor="#FFFFFF"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/tv_app_tagline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Your All-in-One Digital Partner for Smarter Farming &amp; Greater Profits"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <!-- App Description -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tv_app_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textColor="#2E7D32"
+                    android:lineSpacingMultiplier="1.2" />
+            </LinearLayout>
+
+            <!-- Expandable Sections -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- How AgroShield Transforms -->
+                    <include layout="@layout/expandable_section"
+                        android:id="@+id/section_transforms" />
+
+                    <!-- Core Features -->
+                    <include layout="@layout/expandable_section"
+                        android:id="@+id/section_features" />
+
+                    <!-- Designed for Africa -->
+                    <include layout="@layout/expandable_section"
+                        android:id="@+id/section_africa" />
+
+                    <!-- Who Benefits -->
+                    <include layout="@layout/expandable_section"
+                        android:id="@+id/section_benefits" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Call to Action -->
+            <Button
+                android:id="@+id/btn_download"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DOWNLOAD AGROSHIELD"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="16dp"
+                android:backgroundTint="#4CAF50"
+                android:textColor="#FFFFFF"
+                android:textAllCaps="false"
+                style="?attr/borderlessButtonStyle" />
+
+            <!-- Final Tagline -->
+            <TextView
+                android:id="@+id/tv_final_tagline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Secure Your Harvest. Secure Your Future."
+                android:textSize="18sp"
+                android:textStyle="italic"
+                android:textColor="#2E7D32"
+                android:gravity="center"
+                android:padding="16dp" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

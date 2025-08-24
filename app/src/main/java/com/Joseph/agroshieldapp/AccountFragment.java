@@ -59,7 +59,7 @@ public class AccountFragment extends Fragment {
     private LinearLayout followersSection, followingSection, memberSinceSection;
 
     // Account Settings Views
-    private MaterialButton personalInfoBtn, notificationsBtn, paymentBtn, securityBtn, helpBtn, logoutBtn;
+    private MaterialButton personalInfoBtn, notificationsBtn, paymentBtn, securityBtn, helpBtn, logoutBtn,Aboutappbtn,Devbtn;
 
     // App Settings Views
     private LinearLayout darkModeSection;
@@ -173,6 +173,8 @@ public class AccountFragment extends Fragment {
             securityBtn = view.findViewById(R.id.securityBtn);
             helpBtn = view.findViewById(R.id.helpBtn);
             logoutBtn = view.findViewById(R.id.logoutBtn);
+            Aboutappbtn = view.findViewById(R.id.Aboutapp);
+            Devbtn = view.findViewById(R.id.Devbtn);
 
             // App settings
             darkModeSection = view.findViewById(R.id.darkModeSection);
@@ -890,6 +892,9 @@ public class AccountFragment extends Fragment {
   private void  NavigateToFollwersPage(){
       //followers.setOnClickListener(view -> startActivity(new Intent(getActivity(), FollowersActivity.class)));
       following.setOnClickListener(view -> startActivity(new Intent(getActivity(), FollowingActivity.class)));
+      Aboutappbtn.setOnClickListener(view -> startActivity(new Intent(getActivity(), AboutappActivity.class)));
+      Devbtn.setOnClickListener(view -> startActivity(new Intent(getActivity(), DeveloperprofileActivity.class)));
+
 
   }
     private void loadSampleData() {

@@ -270,12 +270,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Account Settings"
+                        android:gravity="center"
                         android:textColor="@android:color/black"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:paddingStart="24dp"
                         android:paddingTop="20dp"
                         android:paddingEnd="24dp"
+                        android:backgroundTint="@color/gradient_end"
+                        android:background="@drawable/glow_border"
                         android:paddingBottom="12dp"/>
 
                     <!-- Options List -->
@@ -291,11 +294,16 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:drawableStart="@drawable/ic_person"
-                            android:drawablePadding="16dp"
-                            android:drawableTint="#FF6200EE"
+                            android:layout_margin="10dp"
+                            android:background="@drawable/rectangular_shape"
+                            android:backgroundTint="@color/white"
                             android:gravity="start|center_vertical"
                             android:paddingStart="24dp"
+                            app:icon="@drawable/ic_profile_placeholder"
+                            app:iconPadding="16dp"
+                            android:pointerIcon="crosshair"
+                            app:iconSize="30dp"
+                            app:iconTint="@color/deep_purple_2"
                             android:text="Personal Information"
                             android:textColor="@android:color/black"
                             android:textSize="15sp"
@@ -308,7 +316,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:drawableStart="@drawable/ic_notifications"
+                            app:icon="@drawable/ic_notification"
+                            app:iconSize="30dp"
+                            app:iconPadding="16dp"
+                            android:layout_margin="10dp"
                             android:drawablePadding="16dp"
                             android:drawableTint="#FF6200EE"
                             android:gravity="start|center_vertical"
@@ -325,8 +336,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:drawableStart="@drawable/ic_payment"
-                            android:drawablePadding="16dp"
+                            app:icon="@drawable/ic_payment"
+                            app:iconSize="30dp"
+                            app:iconPadding="16dp"
+                            android:layout_margin="10dp"
                             android:drawableTint="#FF6200EE"
                             android:gravity="start|center_vertical"
                             android:paddingStart="24dp"
@@ -335,22 +348,24 @@
                             android:textSize="15sp"
                             app:iconGravity="start"/>
 
-                        <!-- Security -->
+                        <!-- about app -->
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/securityBtn"
                             style="@style/Widget.Material3.Button.TextButton"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:drawableStart="@drawable/ic_security"
-                            android:drawablePadding="16dp"
-                            android:drawableTint="#FF6200EE"
+                            app:icon="@drawable/ic_security"
+                            app:iconSize="30dp"
+                            app:iconPadding="16dp"
+                            android:layout_margin="10dp"
                             android:gravity="start|center_vertical"
                             android:paddingStart="24dp"
                             android:text="Security"
                             android:textColor="@android:color/black"
                             android:textSize="15sp"
                             app:iconGravity="start"/>
+
 
                         <!-- Help -->
                         <com.google.android.material.button.MaterialButton
@@ -359,8 +374,11 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:drawableStart="@drawable/ic_help"
                             android:drawablePadding="16dp"
+                            app:icon="@drawable/ic_help"
+                            app:iconSize="30dp"
+                            app:iconPadding="16dp"
+                            android:layout_margin="10dp"
                             android:drawableTint="#FF6200EE"
                             android:gravity="start|center_vertical"
                             android:paddingStart="24dp"
@@ -379,17 +397,23 @@
                         <!-- Logout -->
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/logoutBtn"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="12dp"
-                            android:drawableStart="@drawable/ic_logout"
-                            android:drawablePadding="16dp"
-                            android:drawableTint="#FF0000"
-                            android:gravity="start|center_vertical"
-                            android:paddingStart="24dp"
+                            app:icon="@drawable/ic_logout"
+                            app:iconSize="30dp"
+                            app:iconTint="#FFC107"
+                            android:padding="10dp"
+                            android:background="@drawable/rounded_corner"
+                            android:backgroundTint="@color/colorPrimaryDark"
+                            android:layout_gravity="center"
+                            app:iconPadding="16dp"
+                            android:textStyle="bold"
+                            android:layout_margin="10dp"
+                            android:gravity="center"
+                            android:paddingStart="30dp"
                             android:text="Log Out"
-                            android:textColor="#FF0000"
+                            android:textColor="#F44336"
                             android:textSize="15sp"
                             app:iconGravity="start"/>
                     </LinearLayout>
@@ -430,6 +454,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="App Settings"
+                        android:background="@drawable/glow_border"
+                        android:backgroundTint="@color/yellow"
                         android:textColor="@android:color/black"
                         android:textSize="18sp"
                         android:textStyle="bold"
@@ -438,19 +464,61 @@
                         android:paddingEnd="24dp"
                         android:paddingBottom="12dp"/>
 
+                    <!-- Help -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/Aboutapp"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:drawablePadding="16dp"
+                       app:icon="@drawable/ic_about"
+                        app:iconSize="30dp"
+                        app:iconPadding="16dp"
+                        android:layout_margin="10dp"
+                        android:gravity="start|center_vertical"
+                        android:paddingStart="24dp"
+                        android:text="About App"
+                        android:textColor="@android:color/black"
+                        android:textSize="15sp"
+                        app:iconGravity="start"/>
+
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/Devbtn"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:drawablePadding="16dp"
+                        app:icon="@drawable/ic_about"
+                        app:iconSize="30dp"
+                        app:iconPadding="16dp"
+                        android:layout_margin="10dp"
+                        android:gravity="start|center_vertical"
+                        android:paddingStart="24dp"
+                        android:text="Developer`s Profile"
+                        android:textColor="@android:color/black"
+                        android:textSize="15sp"
+                        app:iconGravity="start"/>
+
                     <!-- Dark Mode Toggle -->
                     <LinearLayout
                         android:id="@+id/darkModeSection"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
+                        android:layout_margin="10dp"
+                        android:backgroundTint="@color/gray_light"
+
+                        android:background="@drawable/rectangular_shape"
                         android:paddingStart="24dp"
                         android:paddingEnd="16dp"
                         android:paddingVertical="12dp">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
                             android:src="@drawable/ic_dark_mode"
                             app:tint="#FF6200EE" />
 
@@ -466,6 +534,8 @@
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/darkModeSwitch"
                             android:layout_width="wrap_content"
+                            android:background="@drawable/rounded_corner"
+                            android:backgroundTint="@color/category_default"
                             android:layout_height="wrap_content"
                             android:checked="false"/>
                     </LinearLayout>
@@ -473,16 +543,17 @@
                     <!-- Language -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/languageBtn"
-                        style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:drawableStart="@drawable/ic_language"
                         android:drawablePadding="16dp"
-                        android:drawableTint="#FF6200EE"
                         android:gravity="start|center_vertical"
                         android:paddingStart="24dp"
+                        android:layout_margin="10dp"
+                        android:background="@drawable/rectangular_shape"
                         android:text="Language: English"
+                        android:backgroundTint="@color/gray_light"
                         android:textColor="@android:color/black"
                         android:textSize="15sp"
                         app:iconGravity="start"/>
@@ -491,9 +562,11 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:shadowRadius="@integer/material_motion_duration_long_1"
+                        android:shadowColor="@color/gradient_end"
                         android:text="AgroShield v2.4.1"
-                        android:textColor="#666666"
-                        android:textSize="12sp"
+                        android:textColor="#FF9800"
+                        android:textSize="16sp"
                         android:gravity="center"
                         android:padding="16dp"/>
                 </LinearLayout>
